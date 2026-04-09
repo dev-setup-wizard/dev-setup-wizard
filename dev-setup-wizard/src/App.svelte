@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import NodeJsModule from "$components/modules/NodeJsModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import { completionPercentStore, configStore } from "$stores/configStore";
 
@@ -40,4 +41,5 @@
   </header>
 
   <PackageManagersModule />
+  <NodeJsModule />
 </main>
