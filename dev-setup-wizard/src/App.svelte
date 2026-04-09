@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import JavaModule from "$components/modules/JavaModule.svelte";
   import NodeJsModule from "$components/modules/NodeJsModule.svelte";
+  import OtherLanguagesModule from "$components/modules/OtherLanguagesModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import PythonModule from "$components/modules/PythonModule.svelte";
   import { completionPercentStore, configStore } from "$stores/configStore";
@@ -46,4 +47,5 @@
   <NodeJsModule />
   <PythonModule />
   <JavaModule />
+  <OtherLanguagesModule />
 </main>
