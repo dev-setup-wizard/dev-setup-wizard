@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import NodeJsModule from "$components/modules/NodeJsModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
+  import PythonModule from "$components/modules/PythonModule.svelte";
   import { completionPercentStore, configStore } from "$stores/configStore";
 
   const title = "开发者环境一键配置器";
@@ -42,4 +43,5 @@
 
   <PackageManagersModule />
   <NodeJsModule />
+  <PythonModule />
 </main>
