@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import JavaModule from "$components/modules/JavaModule.svelte";
   import NodeJsModule from "$components/modules/NodeJsModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import PythonModule from "$components/modules/PythonModule.svelte";
@@ -44,4 +45,5 @@
   <PackageManagersModule />
   <NodeJsModule />
   <PythonModule />
+  <JavaModule />
 </main>
