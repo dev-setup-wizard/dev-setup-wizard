@@ -11,13 +11,17 @@ export interface PackageManagersConfig {
   packageManagers: PackageManager[];
 }
 
+export type RuntimeInstallMethod = "package-manager" | "script";
+
 export interface NodeConfig {
   nodeVersionManager: NodeVersionManager;
   nodeVersions: Array<"latest" | "lts">;
   installYarn: boolean;
   installPnpm: boolean;
   installDeno: boolean;
+  denoInstallMethod: RuntimeInstallMethod;
   installBun: boolean;
+  bunInstallMethod: RuntimeInstallMethod;
 }
 
 export interface PythonConfig {
@@ -175,7 +179,9 @@ export const defaultConfig: Config = {
     installYarn: false,
     installPnpm: true,
     installDeno: false,
+    denoInstallMethod: "package-manager",
     installBun: false,
+    bunInstallMethod: "package-manager",
   },
   python: {
     pythonVersionManager: "pyenv",

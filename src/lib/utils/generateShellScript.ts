@@ -52,47 +52,143 @@ export function generateShellScript(config: Config): string {
     out.push("");
   }
 
-  // Node
-  out.push("# ---- Node.js / JavaScript ----");
-  switch (config.node.nodeVersionManager) {
-    case "fnm":
-      out.push(
-        preferredPm !== "none"
-          ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
-          : 'curl -fsSL https://fnm.vercel.app/install | bash',
-      );
-      break;
-    case "nvm":
-      out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
-      break;
-    case "n":
-      out.push(
-        preferredPm !== "none"
-          ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
-          : "npm i -g n || true",
-      );
-      break;
-    case "asdf":
-      out.push(
-        preferredPm !== "none"
-          ? lines(...addInstallByPackageManager(preferredPm, ["asdf"]))
-          : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
-      );
-      break;
-    case "mise":
-      out.push('curl https://mise.run | sh');
-      break;
-    case "none":
-      out.push('curl -fsSL https://nodejs.org/dist/latest/node-$(uname -s)-$(uname -m).tar.gz >/dev/null || true');
-      break;
+  // Node.js
+  out.push("# ---- Node.js ----");
+  const nodeVersions = config.node.nodeVersions;
+  const hasNodeSelection = nodeVersions.length > 0;
+  const useVm = config.node.nodeVersionManager !== "none";
+
+  if (useVm) {
+    const vm = config.node.nodeVersionManager;
+    switch (vm) {
+      case "fnm":
+        out.push(
+          preferredPm !== "none"
+            ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
+            : 'curl -fsSL https://fnm.vercel.app/install | bash',
+        );
+        if (hasNodeSelection) {
+          if (nodeVersions.includes("latest")) out.push('fnm install latest');
+          if (nodeVersions.includes("lts")) out.push('fnm install lts-lts');
+          out.push('fnm default $(fnm list | grep "lts" | head -1 | awk "{print \\$2}") || true');
+        }
+        break;
+      case "nvm":
+        out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
+        if (hasNodeSelection) {
+          if (nodeVersions.includes("latest")) out.push('nvm install latest');
+          if (nodeVersions.includes("lts")) out.push('nvm install --lts');
+          out.push('nvm alias default lts/* || nvm alias default node || true');
+        }
+        break;
+      case "n":
+        out.push(
+          preferredPm !== "none"
+            ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
+            : "npm i -g n || true",
+        );
+        if (hasNodeSelection) {
+          if (nodeVersions.includes("latest")) out.push('n latest');
+          if (nodeVersions.includes("lts")) out.push('n lts');
+          out.push('n alias default lts || true');
+        }
+        break;
+      case "asdf":
+        out.push(
+          preferredPm !== "none"
+            ? lines(...addInstallByPackageManager(preferredPm, ["asdf"]))
+            : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
+        );
+        out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
+        if (hasNodeSelection) {
+          if (nodeVersions.includes("latest")) out.push('asdf install nodejs latest');
+          if (nodeVersions.includes("lts")) out.push('asdf install nodejs lts');
+          out.push('asdf global nodejs lts || true');
+        }
+        break;
+      case "mise":
+        out.push('curl https://mise.run | sh');
+        if (hasNodeSelection) {
+          if (nodeVersions.includes("latest")) out.push('mise install nodejs latest');
+          if (nodeVersions.includes("lts")) out.push('mise install nodejs lts');
+          out.push('mise use nodejs lts || true');
+        }
+        break;
+    }
+  } else if (preferredPm !== "none") {
+    if (hasNodeSelection) {
+      out.push(...addInstallByPackageManager(preferredPm, ["node"]));
+    } else {
+      out.push("# 未选择 Node 版本，如需安装请手动执行: " + (preferredPm === "homebrew" ? "brew install node" : "port install node"));
+    }
+  } else {
+    out.push('# 请先安装 Node.js（如需使用本脚本安装，请先选择包管理器或版本管理器）');
   }
 
-  if (config.node.nodeVersions.includes("latest")) out.push('echo "安装 Node Latest..."');
-  if (config.node.nodeVersions.includes("lts")) out.push('echo "安装 Node LTS..."');
-  if (config.node.installYarn) out.push("npm i -g yarn || true");
-  if (config.node.installPnpm) out.push("npm i -g pnpm || true");
-  if (config.node.installDeno) out.push("curl -fsSL https://deno.land/install.sh | sh");
-  if (config.node.installBun) out.push("curl -fsSL https://bun.sh/install | bash");
+  if (config.node.installYarn) {
+    if (useVm) {
+      out.push(config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise"
+        ? 'asdf reshime nodejs yarn || npm i -g yarn || true'
+        : 'npm i -g yarn || true');
+    } else if (preferredPm !== "none") {
+      out.push(...addInstallByPackageManager(preferredPm, ["yarn"]));
+    } else {
+      out.push('npm i -g yarn || true');
+    }
+  }
+  if (config.node.installPnpm) {
+    if (useVm) {
+      out.push(config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise"
+        ? 'asdf reshime nodejs pnpm || npm i -g pnpm || true'
+        : 'npm i -g pnpm || true');
+    } else if (preferredPm !== "none") {
+      out.push(...addInstallByPackageManager(preferredPm, ["pnpm"]));
+    } else {
+      out.push('npm i -g pnpm || true');
+    }
+  }
+
+  // Deno
+  if (config.node.installDeno) {
+    out.push("# Deno");
+    const denoMethod = config.node.denoInstallMethod;
+    if (useVm && (config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise")) {
+      out.push('asdf plugin add deno || true');
+      if (denoMethod === "script") {
+        out.push('curl -fsSL https://deno.land/install.sh | sh');
+      } else {
+        out.push('asdf install deno latest');
+        out.push('asdf global deno latest || true');
+      }
+    } else if (denoMethod === "script") {
+      out.push('curl -fsSL https://deno.land/install.sh | sh');
+    } else if (preferredPm !== "none") {
+      out.push(...addInstallByPackageManager(preferredPm, ["deno"]));
+    } else {
+      out.push('curl -fsSL https://deno.land/install.sh | sh');
+    }
+  }
+
+  // Bun
+  if (config.node.installBun) {
+    out.push("# Bun");
+    const bunMethod = config.node.bunInstallMethod;
+    if (useVm && (config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise")) {
+      out.push('asdf plugin add bun || true');
+      if (bunMethod === "script") {
+        out.push('curl -fsSL https://bun.sh/install | bash');
+      } else {
+        out.push('asdf install bun latest');
+        out.push('asdf global bun latest || true');
+      }
+    } else if (bunMethod === "script") {
+      out.push('curl -fsSL https://bun.sh/install | bash');
+    } else if (preferredPm !== "none") {
+      out.push(...addInstallByPackageManager(preferredPm, ["bun"]));
+    } else {
+      out.push('curl -fsSL https://bun.sh/install | bash');
+    }
+  }
   out.push("");
 
   // Python

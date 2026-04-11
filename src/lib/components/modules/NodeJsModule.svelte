@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
   import { configStore } from "$stores/configStore";
-  import type { NodeVersionManager } from "$types/config";
+  import type { NodeVersionManager, RuntimeInstallMethod } from "$types/config";
 
   type VmOption = {
     key: NodeVersionManager;
@@ -15,20 +15,18 @@
     { key: "n", label: "n", tooltip: "使用简单，适合偏命令式习惯。" },
     { key: "asdf", label: "asdf", tooltip: "多语言统一版本管理。" },
     { key: "mise", label: "mise", tooltip: "现代化多语言工具链管理器。" },
-    { key: "none", label: "不使用", tooltip: "将使用官方方式安装最新稳定版 Node。" },
+    { key: "none", label: "不使用", tooltip: "将使用包管理器或手动安装。" },
   ];
 
   const selectedManagers = $derived($configStore.packageManagers.packageManagers);
   const nodeConfig = $derived($configStore.node);
 
-  const denoBunDisabled = $derived(
-    selectedManagers.includes("none") &&
-      selectedManagers.length === 1 &&
-      nodeConfig.nodeVersionManager !== "asdf" &&
-      nodeConfig.nodeVersionManager !== "mise",
+  const hasPackageManager = $derived(
+    selectedManagers.some((pm) => pm === "homebrew" || pm === "macports"),
   );
-
-  const denoBunDisabledTip = "需先选择包管理器或使用 asdf/mise。";
+  const canInstallWithVm = $derived(
+    nodeConfig.nodeVersionManager === "asdf" || nodeConfig.nodeVersionManager === "mise",
+  );
 
   function setVersionManager(next: NodeVersionManager): void {
     configStore.patch({
@@ -58,6 +56,24 @@
       node: {
         ...nodeConfig,
         [key]: value,
+      },
+    });
+  }
+
+  function setDenoMethod(next: RuntimeInstallMethod): void {
+    configStore.patch({
+      node: {
+        ...nodeConfig,
+        denoInstallMethod: next,
+      },
+    });
+  }
+
+  function setBunMethod(next: RuntimeInstallMethod): void {
+    configStore.patch({
+      node: {
+        ...nodeConfig,
+        bunInstallMethod: next,
       },
     });
   }
@@ -98,7 +114,7 @@
   </div>
 
   <div class="mt-5">
-    <h3 class="text-sm font-medium text-slate-200">希望安装的 Node 版本（可不选）</h3>
+    <h3 class="text-sm font-medium text-slate-200">希望安装的 Node 版本</h3>
     <div class="mt-3 flex flex-wrap gap-3">
       <label class="flex items-center gap-2 text-sm text-slate-200" title="最新版本，适合尝鲜。">
         <input
@@ -144,44 +160,83 @@
     </label>
   </div>
 
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
+  <div class="mt-6 border-t border-slate-700 pt-5">
+    <h3 class="text-sm font-medium text-slate-200">其他 JavaScript 运行时</h3>
+  </div>
+
+  <div class="mt-4 grid gap-3 md:grid-cols-2">
     <label
       class={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-        denoBunDisabled
+        !hasPackageManager && !canInstallWithVm
           ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
           : "border-slate-700 bg-slate-950/30"
       }`}
-      title={denoBunDisabled ? denoBunDisabledTip : "安装 Deno 运行时与工具链。"}
     >
-      <span class="text-sm">安装 Deno</span>
+      <div class="flex flex-col">
+        <span class="text-sm text-slate-200">安装 Deno</span>
+        {#if !hasPackageManager && !canInstallWithVm}
+          <span class="text-xs text-amber-300">需选择包管理器或使用 asdf/mise</span>
+        {/if}
+      </div>
       <input
         type="checkbox"
         class="h-4 w-4 accent-teal-500"
         checked={nodeConfig.installDeno}
-        disabled={denoBunDisabled}
+        disabled={!hasPackageManager && !canInstallWithVm}
         onchange={(event) => setBoolean("installDeno", event.currentTarget.checked)}
       />
     </label>
     <label
       class={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-        denoBunDisabled
+        !hasPackageManager && !canInstallWithVm
           ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
           : "border-slate-700 bg-slate-950/30"
       }`}
-      title={denoBunDisabled ? denoBunDisabledTip : "安装 Bun 运行时与包管理能力。"}
     >
-      <span class="text-sm">安装 Bun</span>
+      <div class="flex flex-col">
+        <span class="text-sm text-slate-200">安装 Bun</span>
+        {#if !hasPackageManager && !canInstallWithVm}
+          <span class="text-xs text-amber-300">需选择包管理器或使用 asdf/mise</span>
+        {/if}
+      </div>
       <input
         type="checkbox"
         class="h-4 w-4 accent-teal-500"
         checked={nodeConfig.installBun}
-        disabled={denoBunDisabled}
+        disabled={!hasPackageManager && !canInstallWithVm}
         onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
       />
     </label>
   </div>
 
-  {#if denoBunDisabled}
-    <p class="mt-3 text-xs text-amber-300">{denoBunDisabledTip}</p>
+  {#if nodeConfig.installDeno || nodeConfig.installBun}
+    <div class="mt-3 grid gap-3 md:grid-cols-2">
+      {#if nodeConfig.installDeno}
+        <div class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+          <span class="text-sm text-slate-400">Deno 安装方式：</span>
+          <select
+            class="flex-1 rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+            value={nodeConfig.denoInstallMethod}
+            onchange={(e) => setDenoMethod(e.currentTarget.value as RuntimeInstallMethod)}
+          >
+            <option value="package-manager">包管理器</option>
+            <option value="script">脚本安装</option>
+          </select>
+        </div>
+      {/if}
+      {#if nodeConfig.installBun}
+        <div class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+          <span class="text-sm text-slate-400">Bun 安装方式：</span>
+          <select
+            class="flex-1 rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+            value={nodeConfig.bunInstallMethod}
+            onchange={(e) => setBunMethod(e.currentTarget.value as RuntimeInstallMethod)}
+          >
+            <option value="package-manager">包管理器</option>
+            <option value="script">脚本安装</option>
+          </select>
+        </div>
+      {/if}
+    </div>
   {/if}
 </section>
