@@ -159,9 +159,7 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
     case "java":
       return (
         config.java.jdkInstallMethod !== "none" ||
-        config.java.jdkVersions.length > 0 ||
-        config.java.installMaven ||
-        config.java.installGradle
+        config.java.jdkVersions.length > 0
       );
     case "other-languages":
       return (

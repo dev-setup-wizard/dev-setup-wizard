@@ -43,8 +43,6 @@ export interface JavaConfig {
   jdkInstallMethod: JdkInstallMethod;
   jdkDistribution: JdkDistribution;
   jdkVersions: JdkVersion[];
-  installMaven: boolean;
-  installGradle: boolean;
 }
 
 export interface FlutterOptions {
@@ -208,8 +206,6 @@ export const defaultConfig: Config = {
     jdkInstallMethod: "sdkman",
     jdkDistribution: "temurin",
     jdkVersions: ["21"],
-    installMaven: false,
-    installGradle: false,
   },
   otherLanguages: {
     goEnabled: false,

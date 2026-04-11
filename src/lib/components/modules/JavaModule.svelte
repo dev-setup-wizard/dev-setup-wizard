@@ -79,15 +79,6 @@
       },
     });
   }
-
-  function setTool(key: "installMaven" | "installGradle", value: boolean): void {
-    configStore.patch({
-      java: {
-        ...javaConfig,
-        [key]: value,
-      },
-    });
-  }
 </script>
 
 <section
@@ -157,30 +148,5 @@
         </label>
       {/each}
     </div>
-  </div>
-
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
-    <label
-      class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
-    >
-      <span class="text-sm text-slate-200">Maven</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={javaConfig.installMaven}
-        onchange={(event) => setTool("installMaven", event.currentTarget.checked)}
-      />
-    </label>
-    <label
-      class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
-    >
-      <span class="text-sm text-slate-200">Gradle</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={javaConfig.installGradle}
-        onchange={(event) => setTool("installGradle", event.currentTarget.checked)}
-      />
-    </label>
   </div>
 </section>

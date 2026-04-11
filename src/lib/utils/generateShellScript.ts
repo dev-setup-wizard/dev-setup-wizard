@@ -239,14 +239,6 @@ export function generateShellScript(config: Config): string {
   const jdkMethod = config.java.jdkInstallMethod;
   const jdkInstalled = jdkMethod !== "none";
 
-  function installJdkTool(jdkInstallMethod: string, tool: string): string[] {
-    switch (jdkInstallMethod) {
-      case "brew": return addInstallByPackageManager("homebrew", [tool]);
-      case "ports": return addInstallByPackageManager("macports", [tool]);
-      default: return [];
-    }
-  }
-
   if (jdkInstalled) {
     const dist = config.java.jdkDistribution;
     const jdkPrefix = dist === "temurin" ? "temurin" : dist;
@@ -283,13 +275,6 @@ export function generateShellScript(config: Config): string {
     }
   } else {
     out.push("# 跳过 Java 安装");
-  }
-
-  if (config.java.installMaven) {
-    out.push(...installJdkTool(jdkMethod, "maven"));
-  }
-  if (config.java.installGradle) {
-    out.push(...installJdkTool(jdkMethod, "gradle"));
   }
   out.push("");
 
