@@ -156,10 +156,9 @@
     <h3 class="text-sm font-medium text-slate-200">JavaScript 运行时与包管理器</h3>
   </div>
 
-  <div class="mt-4 space-y-3">
-    <!-- yarn -->
-    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <label class="flex items-center gap-2">
+  <div class="mt-4 grid grid-cols-3 gap-3">
+    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50">
+      <div class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
@@ -167,10 +166,10 @@
           onchange={(event) => setBoolean("installYarn", event.currentTarget.checked)}
         />
         <span class="text-sm text-slate-200">yarn</span>
-      </label>
+      </div>
       {#if nodeConfig.installYarn}
         <select
-          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
           value={nodeConfig.yarnInstallMethod}
           onchange={(e) => setMethod("yarnInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
         >
@@ -179,11 +178,10 @@
           {/each}
         </select>
       {/if}
-    </div>
+    </label>
 
-    <!-- pnpm -->
-    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <label class="flex items-center gap-2">
+    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50">
+      <div class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
@@ -191,10 +189,10 @@
           onchange={(event) => setBoolean("installPnpm", event.currentTarget.checked)}
         />
         <span class="text-sm text-slate-200">pnpm</span>
-      </label>
+      </div>
       {#if nodeConfig.installPnpm}
         <select
-          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
           value={nodeConfig.pnpmInstallMethod}
           onchange={(e) => setMethod("pnpmInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
         >
@@ -203,35 +201,22 @@
           {/each}
         </select>
       {/if}
-    </div>
+    </label>
 
-    <!-- Bun -->
-    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <label class="flex items-center gap-2">
+    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50">
+      <div class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.installBun}
-          onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
+          checked={nodeConfig.enableCorepack}
+          onchange={(event) => setBoolean("enableCorepack", event.currentTarget.checked)}
         />
-        <span class="text-sm text-slate-200">Bun</span>
-      </label>
-      {#if nodeConfig.installBun}
-        <select
-          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
-          value={nodeConfig.bunInstallMethod}
-          onchange={(e) => setMethod("bunInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
-        >
-          {#each installMethodOptions as opt}
-            <option value={opt.key}>{opt.label}</option>
-          {/each}
-        </select>
-      {/if}
-    </div>
+        <span class="text-sm text-slate-200">corepack</span>
+      </div>
+    </label>
 
-    <!-- Deno -->
-    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <label class="flex items-center gap-2">
+    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50">
+      <div class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
@@ -239,10 +224,10 @@
           onchange={(event) => setBoolean("installDeno", event.currentTarget.checked)}
         />
         <span class="text-sm text-slate-200">Deno</span>
-      </label>
+      </div>
       {#if nodeConfig.installDeno}
         <select
-          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
           value={nodeConfig.denoInstallMethod}
           onchange={(e) => setMethod("denoInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
         >
@@ -251,19 +236,29 @@
           {/each}
         </select>
       {/if}
-    </div>
+    </label>
 
-    <!-- corepack -->
-    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <label class="flex items-center gap-2">
+    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50">
+      <div class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.enableCorepack}
-          onchange={(event) => setBoolean("enableCorepack", event.currentTarget.checked)}
+          checked={nodeConfig.installBun}
+          onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
         />
-        <span class="text-sm text-slate-200">corepack enable</span>
-      </label>
-    </div>
+        <span class="text-sm text-slate-200">Bun</span>
+      </div>
+      {#if nodeConfig.installBun}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
+          value={nodeConfig.bunInstallMethod}
+          onchange={(e) => setMethod("bunInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
+        >
+          {#each installMethodOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </label>
   </div>
 </section>
