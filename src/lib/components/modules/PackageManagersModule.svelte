@@ -26,30 +26,17 @@
     {
       key: "none",
       title: "不使用任何包管理器",
-      description: "后续将尽量使用官方安装脚本",
+      description: "使用官方安装脚本或手动安装",
       tooltip: "会影响后续可选项，可用性会下降。",
     },
   ];
 
-  const selectedManagers = $derived($configStore.packageManagers.packageManagers);
-  const isValid = $derived(selectedManagers.length > 0);
+  const selectedManager = $derived($configStore.packageManagers.packageManagers[0] ?? "none");
 
-  function toggleManager(key: PackageManager, checked: boolean): void {
-    const current = $configStore.packageManagers.packageManagers;
-    let next: PackageManager[] = current;
-
-    if (key === "none") {
-      next = checked ? ["none"] : [];
-    } else if (checked) {
-      next = current.filter((item) => item !== "none");
-      if (!next.includes(key)) next = [...next, key];
-    } else {
-      next = current.filter((item) => item !== key);
-    }
-
+  function setManager(key: PackageManager): void {
     configStore.patch({
       packageManagers: {
-        packageManagers: next,
+        packageManagers: key === "none" ? ["none"] : [key],
       },
     });
   }
@@ -73,16 +60,21 @@
 
   <div class="mt-5 grid gap-3 md:grid-cols-3">
     {#each options as option (option.key)}
-      <label
-        class="group relative flex cursor-pointer items-start gap-3 rounded-xl border border-slate-700 bg-slate-950/40 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-900/30"
+      <button
+        type="button"
+        class={`group relative flex cursor-pointer flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+          selectedManager === option.key
+            ? "border-teal-500 bg-teal-500/10 shadow-teal-900/30"
+            : "border-slate-700 bg-slate-950/40 hover:border-teal-500/50 hover:shadow-teal-900/30"
+        }`}
         title={option.tooltip}
+        onclick={() => setManager(option.key)}
       >
-        <input
-          type="checkbox"
-          class="mt-0.5 h-4 w-4 accent-teal-500"
-          checked={selectedManagers.includes(option.key)}
-          onchange={(event) => toggleManager(option.key, event.currentTarget.checked)}
-        />
+        <span class={`h-4 w-4 rounded-full border-2 ${
+          selectedManager === option.key
+            ? "border-teal-500 bg-teal-500"
+            : "border-slate-600"
+        }`}></span>
         <span>
           <span class="text-sm font-medium text-slate-100">{option.title}</span>
           <span class="mt-1 block text-xs text-slate-400">{option.description}</span>
@@ -90,11 +82,13 @@
             提示：{option.tooltip}
           </span>
         </span>
-      </label>
+      </button>
     {/each}
   </div>
 
-  {#if !isValid}
-    <p class="mt-3 text-sm text-rose-400">请至少选择一个包管理器选项，才能继续下一步。</p>
+  {#if selectedManager === "none"}
+    <p class="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+      注意：不使用包管理器将影响后续安装选项。部分工具可能需要手动安装或使用官方脚本。
+    </p>
   {/if}
 </section>
