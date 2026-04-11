@@ -56,11 +56,21 @@ export function generateShellScript(config: Config): string {
   out.push("# ---- Node.js ----");
   const nodeVersions = config.node.nodeVersions;
   const hasNodeSelection = nodeVersions.length > 0;
-  const useVm = config.node.nodeVersionManager !== "none";
+  const installMethod = config.node.nodeInstallMethod;
+  const useVm = installMethod !== "none" && installMethod !== "brew" && installMethod !== "ports";
+
+  function installByMethod(pkg: string, method: string): string[] {
+    switch (method) {
+      case "npm-global": return [`npm i -g ${pkg} || true`];
+      case "brew": return addInstallByPackageManager("homebrew", [pkg]);
+      case "ports": return addInstallByPackageManager("macports", [pkg]);
+      case "script": return [];
+      default: return [];
+    }
+  }
 
   if (useVm) {
-    const vm = config.node.nodeVersionManager;
-    switch (vm) {
+    switch (installMethod) {
       case "fnm":
         out.push(
           preferredPm !== "none"
@@ -68,17 +78,19 @@ export function generateShellScript(config: Config): string {
             : 'curl -fsSL https://fnm.vercel.app/install | bash',
         );
         if (hasNodeSelection) {
-          if (nodeVersions.includes("latest")) out.push('fnm install latest');
-          if (nodeVersions.includes("lts")) out.push('fnm install lts-lts');
-          out.push('fnm default $(fnm list | grep "lts" | head -1 | awk "{print \\$2}") || true');
+          if (nodeVersions.includes("v22")) out.push('fnm install 22');
+          if (nodeVersions.includes("v24")) out.push('fnm install 24');
+          if (nodeVersions.includes("v25")) out.push('fnm install 25');
+          out.push('fnm default 22 || true');
         }
         break;
       case "nvm":
         out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("latest")) out.push('nvm install latest');
-          if (nodeVersions.includes("lts")) out.push('nvm install --lts');
-          out.push('nvm alias default lts/* || nvm alias default node || true');
+          if (nodeVersions.includes("v22")) out.push('nvm install 22');
+          if (nodeVersions.includes("v24")) out.push('nvm install 24');
+          if (nodeVersions.includes("v25")) out.push('nvm install 25');
+          out.push('nvm alias default 22 || true');
         }
         break;
       case "n":
@@ -88,9 +100,10 @@ export function generateShellScript(config: Config): string {
             : "npm i -g n || true",
         );
         if (hasNodeSelection) {
-          if (nodeVersions.includes("latest")) out.push('n latest');
-          if (nodeVersions.includes("lts")) out.push('n lts');
-          out.push('n alias default lts || true');
+          if (nodeVersions.includes("v22")) out.push('n 22');
+          if (nodeVersions.includes("v24")) out.push('n 24');
+          if (nodeVersions.includes("v25")) out.push('n 25');
+          out.push('n alias default 22 || true');
         }
         break;
       case "asdf":
@@ -101,50 +114,56 @@ export function generateShellScript(config: Config): string {
         );
         out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("latest")) out.push('asdf install nodejs latest');
-          if (nodeVersions.includes("lts")) out.push('asdf install nodejs lts');
-          out.push('asdf global nodejs lts || true');
+          if (nodeVersions.includes("v22")) out.push('asdf install nodejs 22');
+          if (nodeVersions.includes("v24")) out.push('asdf install nodejs 24');
+          if (nodeVersions.includes("v25")) out.push('asdf install nodejs 25');
+          out.push('asdf global nodejs 22 || true');
         }
         break;
       case "mise":
         out.push('curl https://mise.run | sh');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("latest")) out.push('mise install nodejs latest');
-          if (nodeVersions.includes("lts")) out.push('mise install nodejs lts');
-          out.push('mise use nodejs lts || true');
+          if (nodeVersions.includes("v22")) out.push('mise install nodejs 22');
+          if (nodeVersions.includes("v24")) out.push('mise install nodejs 24');
+          if (nodeVersions.includes("v25")) out.push('mise install nodejs 25');
+          out.push('mise use nodejs 22 || true');
         }
         break;
     }
-  } else if (preferredPm !== "none") {
+  } else if (installMethod === "brew") {
     if (hasNodeSelection) {
-      out.push(...addInstallByPackageManager(preferredPm, ["node"]));
+      out.push(...addInstallByPackageManager("homebrew", ["node"]));
     } else {
-      out.push("# 未选择 Node 版本，如需安装请手动执行: " + (preferredPm === "homebrew" ? "brew install node" : "port install node"));
+      out.push("# 未选择 Node 版本，如需安装请执行: brew install node");
     }
-  } else {
-    out.push('# 请先安装 Node.js（如需使用本脚本安装，请先选择包管理器或版本管理器）');
+  } else if (installMethod === "ports") {
+    if (hasNodeSelection) {
+      out.push(...addInstallByPackageManager("macports", ["node"]));
+    } else {
+      out.push("# 未选择 Node 版本，如需安装请执行: sudo port install node");
+    }
+  } else if (installMethod === "none") {
+    out.push('# 跳过 Node.js 安装（如需使用本脚本安装，请先选择安装方式）');
   }
 
+  // yarn
   if (config.node.installYarn) {
-    if (useVm) {
-      out.push(config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise"
-        ? 'asdf reshime nodejs yarn || npm i -g yarn || true'
-        : 'npm i -g yarn || true');
-    } else if (preferredPm !== "none") {
-      out.push(...addInstallByPackageManager(preferredPm, ["yarn"]));
-    } else {
-      out.push('npm i -g yarn || true');
-    }
+    out.push(...installByMethod("yarn", config.node.yarnInstallMethod));
   }
+
+  // pnpm
   if (config.node.installPnpm) {
-    if (useVm) {
-      out.push(config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise"
-        ? 'asdf reshime nodejs pnpm || npm i -g pnpm || true'
-        : 'npm i -g pnpm || true');
-    } else if (preferredPm !== "none") {
-      out.push(...addInstallByPackageManager(preferredPm, ["pnpm"]));
+    out.push(...installByMethod("pnpm", config.node.pnpmInstallMethod));
+  }
+
+  // Bun
+  if (config.node.installBun) {
+    out.push("# Bun");
+    const bunMethod = config.node.bunInstallMethod;
+    if (bunMethod === "script") {
+      out.push('curl -fsSL https://bun.sh/install | bash');
     } else {
-      out.push('npm i -g pnpm || true');
+      out.push(...installByMethod("bun", bunMethod));
     }
   }
 
@@ -152,42 +171,16 @@ export function generateShellScript(config: Config): string {
   if (config.node.installDeno) {
     out.push("# Deno");
     const denoMethod = config.node.denoInstallMethod;
-    if (useVm && (config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise")) {
-      out.push('asdf plugin add deno || true');
-      if (denoMethod === "script") {
-        out.push('curl -fsSL https://deno.land/install.sh | sh');
-      } else {
-        out.push('asdf install deno latest');
-        out.push('asdf global deno latest || true');
-      }
-    } else if (denoMethod === "script") {
+    if (denoMethod === "script") {
       out.push('curl -fsSL https://deno.land/install.sh | sh');
-    } else if (preferredPm !== "none") {
-      out.push(...addInstallByPackageManager(preferredPm, ["deno"]));
     } else {
-      out.push('curl -fsSL https://deno.land/install.sh | sh');
+      out.push(...installByMethod("deno", denoMethod));
     }
   }
 
-  // Bun
-  if (config.node.installBun) {
-    out.push("# Bun");
-    const bunMethod = config.node.bunInstallMethod;
-    if (useVm && (config.node.nodeVersionManager === "asdf" || config.node.nodeVersionManager === "mise")) {
-      out.push('asdf plugin add bun || true');
-      if (bunMethod === "script") {
-        out.push('curl -fsSL https://bun.sh/install | bash');
-      } else {
-        out.push('asdf install bun latest');
-        out.push('asdf global bun latest || true');
-      }
-    } else if (bunMethod === "script") {
-      out.push('curl -fsSL https://bun.sh/install | bash');
-    } else if (preferredPm !== "none") {
-      out.push(...addInstallByPackageManager(preferredPm, ["bun"]));
-    } else {
-      out.push('curl -fsSL https://bun.sh/install | bash');
-    }
+  // corepack
+  if (config.node.enableCorepack) {
+    out.push("corepack enable || true");
   }
   out.push("");
 

@@ -1,7 +1,9 @@
 export type OSFamily = "macos" | "linux";
 
 export type PackageManager = "homebrew" | "macports" | "none";
-export type NodeVersionManager = "fnm" | "nvm" | "n" | "asdf" | "mise" | "none";
+export type NodeInstallMethod = "fnm" | "nvm" | "n" | "asdf" | "mise" | "brew" | "ports" | "none";
+export type NodeVersion = "v25" | "v24" | "v22";
+export type JsRuntimeInstallMethod = "npm-global" | "brew" | "ports" | "script";
 export type PythonVersionManager = "pyenv" | "uv" | "conda" | "asdf" | "mise" | "none";
 export type PythonInstallMethod = "package-manager" | "python-org";
 export type JdkDistribution = "openjdk" | "oracle" | "temurin";
@@ -11,17 +13,18 @@ export interface PackageManagersConfig {
   packageManagers: PackageManager[];
 }
 
-export type RuntimeInstallMethod = "package-manager" | "script";
-
 export interface NodeConfig {
-  nodeVersionManager: NodeVersionManager;
-  nodeVersions: Array<"latest" | "lts">;
+  nodeInstallMethod: NodeInstallMethod;
+  nodeVersions: NodeVersion[];
   installYarn: boolean;
+  yarnInstallMethod: JsRuntimeInstallMethod;
   installPnpm: boolean;
+  pnpmInstallMethod: JsRuntimeInstallMethod;
   installDeno: boolean;
-  denoInstallMethod: RuntimeInstallMethod;
+  denoInstallMethod: JsRuntimeInstallMethod;
   installBun: boolean;
-  bunInstallMethod: RuntimeInstallMethod;
+  bunInstallMethod: JsRuntimeInstallMethod;
+  enableCorepack: boolean;
 }
 
 export interface PythonConfig {
@@ -174,14 +177,17 @@ export const defaultConfig: Config = {
     packageManagers: ["homebrew"],
   },
   node: {
-    nodeVersionManager: "fnm",
-    nodeVersions: ["lts"],
+    nodeInstallMethod: "fnm",
+    nodeVersions: [],
     installYarn: false,
+    yarnInstallMethod: "npm-global",
     installPnpm: true,
+    pnpmInstallMethod: "npm-global",
     installDeno: false,
-    denoInstallMethod: "package-manager",
+    denoInstallMethod: "npm-global",
     installBun: false,
-    bunInstallMethod: "package-manager",
+    bunInstallMethod: "npm-global",
+    enableCorepack: false,
   },
   python: {
     pythonVersionManager: "pyenv",
