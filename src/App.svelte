@@ -7,6 +7,7 @@
   import OtherLanguagesModule from "$components/modules/OtherLanguagesModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import PythonModule from "$components/modules/PythonModule.svelte";
+  import ShellModule from "$components/modules/ShellModule.svelte";
   import { completionPercentStore, configStore } from "$stores/configStore";
   import { generateShellScript } from "$utils/generateShellScript";
 
@@ -70,6 +71,7 @@
       <PythonModule />
       <JavaModule />
       <OtherLanguagesModule />
+      <ShellModule />
       <DeveloperToolsModule />
     </div>
     <div class="lg:sticky lg:top-28 lg:self-start">
