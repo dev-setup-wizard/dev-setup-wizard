@@ -61,7 +61,12 @@
   }
 
   function setDistribution(next: JdkDistribution): void {
-    configStore.patch({java: {...javaConfig, jdkDistribution: next}});
+    configStore.patch({
+      java: {
+        ...javaConfig,
+        jdkDistribution: next,
+      },
+    });
   }
 </script>
 

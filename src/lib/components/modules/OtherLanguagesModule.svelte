@@ -80,7 +80,7 @@
           ? "border-teal-500 bg-teal-500/10"
           : "border-slate-700 bg-slate-950/30 hover:border-teal-500/50"
       }`}
-      onclick={toggleFlutter}
+onclick={() => setBoolean("flutterEnabled", !otherLanguages.flutterEnabled)}
     >
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-medium text-slate-100">Flutter</h3>

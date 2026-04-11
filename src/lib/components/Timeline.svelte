@@ -40,15 +40,12 @@
           return (
             config.python.pythonInstallMethod !== "none" ||
             config.python.installPythonLatest ||
-            config.python.installPipx ||
-            config.python.installPoetry
+            config.python.installPython2
           );
         case "java":
           return (
             config.java.jdkInstallMethod !== "none" ||
-            config.java.jdkVersions.length > 0 ||
-            config.java.installMaven ||
-            config.java.installGradle
+            config.java.jdkVersions.length > 0
           );
         case "other-languages":
           return (
