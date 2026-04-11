@@ -32,10 +32,6 @@ export interface PythonConfig {
   pythonInstallMethod: PythonInstallMethod;
   installPythonLatest: boolean;
   aliasPythonToPython3: boolean;
-  installPipx: boolean;
-  pipxInstallMethod: PythonToolInstallMethod;
-  installPoetry: boolean;
-  poetryInstallMethod: PythonToolInstallMethod;
   installPython2: boolean;
 }
 
@@ -43,8 +39,6 @@ export interface JavaConfig {
   jdkInstallMethod: JdkInstallMethod;
   jdkDistribution: JdkDistribution;
   jdkVersions: JdkVersion[];
-  installMaven: boolean;
-  installGradle: boolean;
 }
 
 export interface FlutterOptions {
@@ -130,6 +124,7 @@ export interface NetworkToolsConfig {
 export interface ShellCustomizationConfig {
   ohMyZsh: boolean;
   installRecommendedPlugins: boolean;
+  ohMyPosh: boolean;
 }
 
 export interface DeveloperToolsConfig {
@@ -198,18 +193,12 @@ export const defaultConfig: Config = {
     pythonInstallMethod: "uv",
     installPythonLatest: false,
     aliasPythonToPython3: true,
-    installPipx: false,
-    pipxInstallMethod: "pip",
-    installPoetry: false,
-    poetryInstallMethod: "pip",
     installPython2: false,
   },
   java: {
     jdkInstallMethod: "sdkman",
     jdkDistribution: "temurin",
     jdkVersions: ["21"],
-    installMaven: false,
-    installGradle: false,
   },
   otherLanguages: {
     goEnabled: false,
@@ -237,6 +226,7 @@ export const defaultConfig: Config = {
     shellCustomization: {
       ohMyZsh: false,
       installRecommendedPlugins: false,
+      ohMyPosh: false,
     },
     servers: {
       nginx: false,

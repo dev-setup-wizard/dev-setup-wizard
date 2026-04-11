@@ -36,9 +36,7 @@
   const hasHomebrew = $derived(selectedManagers.includes("homebrew"));
   const hasPorts = $derived(selectedManagers.includes("macports"));
 
-  const canSelectOptions = $derived(
-    javaConfig.jdkInstallMethod !== "none",
-  );
+  const canSelectOptions = $derived(javaConfig.jdkInstallMethod !== "none");
 
   const filteredInstallMethods = $derived(
     installMethodOptions.map((opt) => {
@@ -50,10 +48,7 @@
 
   function setInstallMethod(next: JdkInstallMethod): void {
     configStore.patch({
-      java: {
-        ...javaConfig,
-        jdkInstallMethod: next,
-      },
+      java: {...javaConfig, jdkInstallMethod: next},
     });
   }
 
@@ -62,31 +57,11 @@
     const next = checked
       ? Array.from(new Set([...current, version]))
       : current.filter((item) => item !== version);
-
-    configStore.patch({
-      java: {
-        ...javaConfig,
-        jdkVersions: next,
-      },
-    });
+    configStore.patch({java: {...javaConfig, jdkVersions: next}});
   }
 
   function setDistribution(next: JdkDistribution): void {
-    configStore.patch({
-      java: {
-        ...javaConfig,
-        jdkDistribution: next,
-      },
-    });
-  }
-
-  function setTool(key: "installMaven" | "installGradle", value: boolean): void {
-    configStore.patch({
-      java: {
-        ...javaConfig,
-        [key]: value,
-      },
-    });
+    configStore.patch({java: {...javaConfig, jdkDistribution: next}});
   }
 </script>
 
@@ -99,7 +74,7 @@
     <div>
       <p class="text-xs font-medium tracking-wide text-teal-400">模块 4 / 6</p>
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">Java 模块</h2>
-      <p class="mt-2 text-sm text-slate-400">选择 JDK 安装方式和工具。</p>
+      <p class="mt-2 text-sm text-slate-400">选择 JDK 安装方式、版本和发行版。</p>
     </div>
   </div>
 
@@ -122,9 +97,7 @@
     <h3 class="text-sm font-medium text-slate-200">JDK 版本</h3>
     <div class="mt-2 flex flex-wrap gap-2">
       {#each versionOptions as option (option.key)}
-        <label
-          class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
-        >
+        <label class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
           <input
             type="checkbox"
             class="h-4 w-4 accent-teal-500"
@@ -142,9 +115,7 @@
     <h3 class="text-sm font-medium text-slate-200">JDK 发行版</h3>
     <div class="mt-2 flex flex-wrap gap-2">
       {#each distributionOptions as option (option.key)}
-        <label
-          class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
-        >
+        <label class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
           <input
             type="radio"
             name="jdk-distribution"
@@ -157,30 +128,5 @@
         </label>
       {/each}
     </div>
-  </div>
-
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
-    <label
-      class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
-    >
-      <span class="text-sm text-slate-200">Maven</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={javaConfig.installMaven}
-        onchange={(event) => setTool("installMaven", event.currentTarget.checked)}
-      />
-    </label>
-    <label
-      class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
-    >
-      <span class="text-sm text-slate-200">Gradle</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={javaConfig.installGradle}
-        onchange={(event) => setTool("installGradle", event.currentTarget.checked)}
-      />
-    </label>
   </div>
 </section>
