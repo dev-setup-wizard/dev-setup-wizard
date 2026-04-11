@@ -149,16 +149,19 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
       );
     case "python":
       return (
-        config.python.pythonVersionManager !== "none" ||
+        config.python.pythonInstallMethod !== "none" ||
+        config.python.installPythonLatest ||
         config.python.aliasPythonToPython3 ||
+        config.python.installPipx ||
+        config.python.installPoetry ||
         config.python.installPython2
       );
     case "java":
       return (
+        config.java.jdkInstallMethod !== "none" ||
         config.java.jdkVersions.length > 0 ||
         config.java.installMaven ||
-        config.java.installGradle ||
-        config.java.installSdkman
+        config.java.installGradle
       );
     case "other-languages":
       return (

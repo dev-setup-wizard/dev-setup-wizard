@@ -46,11 +46,10 @@ describe("generateShellScript", () => {
 
   it("adds darwin guard for mac-only hints", () => {
     const cfg = makeConfig({
-      packageManagers: { packageManagers: ["none"] },
+      packageManagers: { packageManagers: ["macports"] },
       python: {
         ...defaultConfig.python,
-        pythonVersionManager: "none",
-        pythonInstallMethod: "python-org",
+        pythonInstallMethod: "ports",
       },
     });
     const script = generateShellScript(cfg);

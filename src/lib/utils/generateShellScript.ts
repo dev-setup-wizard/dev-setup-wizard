@@ -186,38 +186,111 @@ export function generateShellScript(config: Config): string {
 
   // Python
   out.push("# ---- Python ----");
-  if (config.python.pythonVersionManager === "none") {
-    if (config.python.pythonInstallMethod === "package-manager" && preferredPm !== "none") {
-      out.push(...addInstallByPackageManager(preferredPm, ["python"]));
-    } else {
-      out.push(isDarwinGuard('echo "请从 python.org 安装 Python 官方包"'));
+  const pyMethod = config.python.pythonInstallMethod;
+  const pyInstalled = pyMethod !== "none";
+  
+  function installPythonTool(pythonMethod: string, tool: string): string[] {
+    switch (pythonMethod) {
+      case "brew": return addInstallByPackageManager("homebrew", [tool]);
+      case "ports": return addInstallByPackageManager("macports", [tool]);
+      case "uv": return [`pip install ${tool} || true`];
+      case "pip": return [`pip install ${tool} || true`];
+      default: return [];
+    }
+  }
+
+  if (pyInstalled) {
+    switch (pyMethod) {
+      case "uv": out.push("pip install uv || true"); break;
+      case "pyenv": out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); break;
+      case "conda": out.push(...addInstallByPackageManager(preferredPm, ["miniconda"])); break;
+      case "mise": out.push('curl https://mise.run | sh'); break;
+      case "asdf": out.push(...addInstallByPackageManager(preferredPm, ["asdf"])); break;
+      case "brew": out.push(...addInstallByPackageManager("homebrew", ["python"])); break;
+      case "ports": out.push(...addInstallByPackageManager("macports", ["python3"])); break;
+    }
+    if (config.python.installPythonLatest) {
+      out.push(pyMethod === "uv" ? "uv python install latest" : "# install python latest");
     }
   } else {
-    const pyVmMap: Record<Exclude<Config["python"]["pythonVersionManager"], "none">, string[]> = {
-      pyenv: ["pyenv"],
-      uv: ["uv"],
-      conda: ["miniconda"],
-      asdf: ["asdf"],
-      mise: ["mise"],
-    };
-    const vm = pyVmMap[config.python.pythonVersionManager];
-    out.push(...(preferredPm !== "none" ? addInstallByPackageManager(preferredPm, vm) : [`# install ${vm[0]}`]));
+    out.push("# 跳过 Python 安装");
   }
-  if (config.python.aliasPythonToPython3) out.push('echo \'alias python="python3"\' >> ~/.zshrc');
-  if (config.python.installPython2) out.push("# WARNING: Python 2 has reached end-of-life");
+
+  if (config.python.aliasPythonToPython3) {
+    out.push('echo \'alias python="python3"\' >> ~/.zshrc');
+  }
+
+  if (config.python.installPipx) {
+    out.push(...installPythonTool(config.python.pipxInstallMethod, "pipx"));
+    out.push("pipx ensurepath || true");
+  }
+
+  if (config.python.installPoetry) {
+    out.push(...installPythonTool(config.python.poetryInstallMethod, "poetry"));
+  }
+
+  if (config.python.installPython2) {
+    out.push("# WARNING: Python 2 已停止维护");
+  }
   out.push("");
 
   // Java
   out.push("# ---- Java ----");
-  const jdkPkgPrefix = config.java.jdkDistribution === "temurin" ? "temurin" : "openjdk";
-  for (const version of config.java.jdkVersions) {
-    const suffix = version === "newest" ? "" : version.replace("-lts", "");
-    const pkg = suffix ? `${jdkPkgPrefix}@${suffix}` : jdkPkgPrefix;
-    out.push(...(preferredPm !== "none" ? addInstallByPackageManager(preferredPm, [pkg]) : [`# install ${pkg}`]));
+  const jdkMethod = config.java.jdkInstallMethod;
+  const jdkInstalled = jdkMethod !== "none";
+
+  function installJdkTool(jdkInstallMethod: string, tool: string): string[] {
+    switch (jdkInstallMethod) {
+      case "brew": return addInstallByPackageManager("homebrew", [tool]);
+      case "ports": return addInstallByPackageManager("macports", [tool]);
+      default: return [];
+    }
   }
-  if (config.java.installMaven) out.push(...addInstallByPackageManager(preferredPm, ["maven"]));
-  if (config.java.installGradle) out.push(...addInstallByPackageManager(preferredPm, ["gradle"]));
-  if (config.java.installSdkman) out.push('curl -s "https://get.sdkman.io" | bash');
+
+  if (jdkInstalled) {
+    const dist = config.java.jdkDistribution;
+    const jdkPrefix = dist === "temurin" ? "temurin" : dist;
+
+    switch (jdkMethod) {
+      case "sdkman":
+        out.push('curl -s "https://get.sdkman.io" | bash');
+        for (const v of config.java.jdkVersions) {
+          out.push(`sdk install java ${jdkPrefix}-${v}.zulu || true`);
+        }
+        break;
+      case "mise":
+        out.push('curl https://mise.run | sh');
+        for (const v of config.java.jdkVersions) {
+          out.push(`mise install java ${jdkPrefix}-${v} || true`);
+        }
+        break;
+      case "asdf":
+        out.push(...addInstallByPackageManager(preferredPm, ["asdf"]));
+        for (const v of config.java.jdkVersions) {
+          out.push(`asdf install java ${jdkPrefix}-${v} || true`);
+        }
+        break;
+      case "brew":
+        for (const v of config.java.jdkVersions) {
+          out.push(...addInstallByPackageManager("homebrew", [`${jdkPrefix}@${v}`]));
+        }
+        break;
+      case "ports":
+        for (const v of config.java.jdkVersions) {
+          out.push(...addInstallByPackageManager("macports", [`openjdk${v}`]));
+        }
+        break;
+    }
+  } else {
+    out.push("# 跳过 Java 安装");
+  }
+
+  if (config.java.installMaven) {
+    out.push(...installJdkTool(jdkMethod, "maven"));
+  }
+  if (config.java.installGradle) {
+    out.push(...installJdkTool(jdkMethod, "gradle"));
+  }
   out.push("");
 
   // Other languages

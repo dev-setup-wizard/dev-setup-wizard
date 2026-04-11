@@ -4,10 +4,11 @@ export type PackageManager = "homebrew" | "macports" | "none";
 export type NodeInstallMethod = "fnm" | "nvm" | "n" | "asdf" | "mise" | "brew" | "ports" | "none";
 export type NodeVersion = "v25" | "v24" | "v22";
 export type JsRuntimeInstallMethod = "npm-global" | "brew" | "ports" | "script";
-export type PythonVersionManager = "pyenv" | "uv" | "conda" | "asdf" | "mise" | "none";
-export type PythonInstallMethod = "package-manager" | "python-org";
+export type PythonInstallMethod = "uv" | "pyenv" | "conda" | "mise" | "asdf" | "brew" | "ports" | "none";
+export type PythonToolInstallMethod = "pip" | "brew" | "ports" | "script";
+export type JdkInstallMethod = "sdkman" | "brew" | "ports" | "mise" | "asdf" | "none";
 export type JdkDistribution = "openjdk" | "oracle" | "temurin";
-export type JdkVersion = "25-lts" | "21-lts" | "17-lts" | "11-lts" | "newest";
+export type JdkVersion = "25" | "21" | "17" | "11";
 
 export interface PackageManagersConfig {
   packageManagers: PackageManager[];
@@ -28,18 +29,22 @@ export interface NodeConfig {
 }
 
 export interface PythonConfig {
-  pythonVersionManager: PythonVersionManager;
   pythonInstallMethod: PythonInstallMethod;
+  installPythonLatest: boolean;
   aliasPythonToPython3: boolean;
+  installPipx: boolean;
+  pipxInstallMethod: PythonToolInstallMethod;
+  installPoetry: boolean;
+  poetryInstallMethod: PythonToolInstallMethod;
   installPython2: boolean;
 }
 
 export interface JavaConfig {
+  jdkInstallMethod: JdkInstallMethod;
   jdkDistribution: JdkDistribution;
   jdkVersions: JdkVersion[];
   installMaven: boolean;
   installGradle: boolean;
-  installSdkman: boolean;
 }
 
 export interface FlutterOptions {
@@ -190,17 +195,21 @@ export const defaultConfig: Config = {
     enableCorepack: false,
   },
   python: {
-    pythonVersionManager: "pyenv",
-    pythonInstallMethod: "package-manager",
+    pythonInstallMethod: "uv",
+    installPythonLatest: false,
     aliasPythonToPython3: true,
+    installPipx: false,
+    pipxInstallMethod: "pip",
+    installPoetry: false,
+    poetryInstallMethod: "pip",
     installPython2: false,
   },
   java: {
+    jdkInstallMethod: "sdkman",
     jdkDistribution: "temurin",
-    jdkVersions: ["21-lts"],
+    jdkVersions: ["21"],
     installMaven: false,
     installGradle: false,
-    installSdkman: false,
   },
   otherLanguages: {
     goEnabled: false,
