@@ -270,12 +270,81 @@ export function generateShellScript(config: Config): string {
   }
   out.push("");
 
-  // Developer tools (sample package-based installation lines)
-  out.push("# ---- Developer Tools ----");
-  const cliPackages = Object.entries(config.developerTools.cliTools)
-    .filter(([, enabled]) => enabled)
-    .map(([name]) => name);
-  out.push(...addInstallByPackageManager(preferredPm, cliPackages));
+  // Shell customization
+  out.push("# ---- Shell 美化 ----");
+  if (config.developerTools.shellCustomization.ohMyZsh) {
+    out.push('sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"');
+    if (config.developerTools.shellCustomization.installRecommendedPlugins) {
+      out.push('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true');
+      out.push('git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true');
+    }
+  }
+  if (config.developerTools.shellCustomization.ohMyPosh) {
+    out.push('curl -s https://ohmyposh.sh/install.sh | bash -s || true');
+  }
+  out.push("");
+
+  // Developer tools
+  const pm = hasPackageManager(config) ? preferredPm : "none";
+  if (pm !== "none") {
+    out.push("# ---- Developer Tools ----");
+    
+    const cliPackages = Object.entries(config.developerTools.cliTools)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (cliPackages.length > 0) {
+      out.push("# CLI 工具");
+      out.push(...addInstallByPackageManager(pm, cliPackages));
+    }
+
+    const serverPackages = Object.entries(config.developerTools.servers)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (serverPackages.length > 0) {
+      out.push("# 服务器");
+      out.push(...addInstallByPackageManager(pm, serverPackages));
+    }
+
+    const databasePackages = Object.entries(config.developerTools.databases)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (databasePackages.length > 0) {
+      out.push("# 数据库");
+      out.push(...addInstallByPackageManager(pm, databasePackages));
+    }
+
+    const containerPackages = Object.entries(config.developerTools.containers)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (containerPackages.length > 0) {
+      out.push("# 容器");
+      out.push(...addInstallByPackageManager(pm, containerPackages));
+    }
+
+    const guiPackages = Object.entries(config.developerTools.guiApps)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (guiPackages.length > 0) {
+      out.push("# GUI 应用");
+      out.push(...addInstallByPackageManager(pm, guiPackages));
+    }
+
+    const aiPackages = Object.entries(config.developerTools.aiTools)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (aiPackages.length > 0) {
+      out.push("# AI 工具");
+      out.push(...addInstallByPackageManager(pm, aiPackages));
+    }
+
+    const networkPackages = Object.entries(config.developerTools.networkTools)
+      .filter(([, enabled]) => enabled)
+      .map(([name]) => name);
+    if (networkPackages.length > 0) {
+      out.push("# 网络工具");
+      out.push(...addInstallByPackageManager(pm, networkPackages));
+    }
+  }
 
   if (config.developerTools.containers.addCurrentUserToContainerGroups) {
     if (config.developerTools.containers.docker) out.push('sudo usermod -aG docker "$USER" || true');
