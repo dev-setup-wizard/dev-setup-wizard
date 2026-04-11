@@ -152,8 +152,6 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
         config.python.pythonInstallMethod !== "none" ||
         config.python.installPythonLatest ||
         config.python.aliasPythonToPython3 ||
-        config.python.installPipx ||
-        config.python.installPoetry ||
         config.python.installPython2
       );
     case "java":

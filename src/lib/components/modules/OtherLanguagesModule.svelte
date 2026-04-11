@@ -15,6 +15,16 @@
       otherLanguages: {...otherLanguages, flutter: {...otherLanguages.flutter, channel}},
     });
   }
+
+  function toggleFlutter(e: MouseEvent): void {
+    e.stopPropagation();
+    setBoolean("flutterEnabled", !otherLanguages.flutterEnabled);
+  }
+
+  function selectFlutterChannel(e: MouseEvent, ch: "stable" | "beta" | "master"): void {
+    e.stopPropagation();
+    setFlutterChannel(ch);
+  }
 </script>
 
 <section
@@ -70,7 +80,7 @@
           ? "border-teal-500 bg-teal-500/10"
           : "border-slate-700 bg-slate-950/30 hover:border-teal-500/50"
       }`}
-      onclick={() => setBoolean("flutterEnabled", !otherLanguages.flutterEnabled)}
+onclick={() => setBoolean("flutterEnabled", !otherLanguages.flutterEnabled)}
     >
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-medium text-slate-100">Flutter</h3>

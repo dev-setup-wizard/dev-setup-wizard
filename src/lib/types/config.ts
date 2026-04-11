@@ -32,10 +32,6 @@ export interface PythonConfig {
   pythonInstallMethod: PythonInstallMethod;
   installPythonLatest: boolean;
   aliasPythonToPython3: boolean;
-  installPipx: boolean;
-  pipxInstallMethod: PythonToolInstallMethod;
-  installPoetry: boolean;
-  poetryInstallMethod: PythonToolInstallMethod;
   installPython2: boolean;
 }
 
@@ -128,6 +124,7 @@ export interface NetworkToolsConfig {
 export interface ShellCustomizationConfig {
   ohMyZsh: boolean;
   installRecommendedPlugins: boolean;
+  ohMyPosh: boolean;
 }
 
 export interface DeveloperToolsConfig {
@@ -196,10 +193,6 @@ export const defaultConfig: Config = {
     pythonInstallMethod: "uv",
     installPythonLatest: false,
     aliasPythonToPython3: true,
-    installPipx: false,
-    pipxInstallMethod: "pip",
-    installPoetry: false,
-    poetryInstallMethod: "pip",
     installPython2: false,
   },
   java: {
@@ -233,6 +226,7 @@ export const defaultConfig: Config = {
     shellCustomization: {
       ohMyZsh: false,
       installRecommendedPlugins: false,
+      ohMyPosh: false,
     },
     servers: {
       nginx: false,

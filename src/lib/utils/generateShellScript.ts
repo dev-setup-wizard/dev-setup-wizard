@@ -188,16 +188,6 @@ export function generateShellScript(config: Config): string {
   out.push("# ---- Python ----");
   const pyMethod = config.python.pythonInstallMethod;
   const pyInstalled = pyMethod !== "none";
-  
-  function installPythonTool(pythonMethod: string, tool: string): string[] {
-    switch (pythonMethod) {
-      case "brew": return addInstallByPackageManager("homebrew", [tool]);
-      case "ports": return addInstallByPackageManager("macports", [tool]);
-      case "uv": return [`pip install ${tool} || true`];
-      case "pip": return [`pip install ${tool} || true`];
-      default: return [];
-    }
-  }
 
   if (pyInstalled) {
     switch (pyMethod) {
@@ -218,15 +208,6 @@ export function generateShellScript(config: Config): string {
 
   if (config.python.aliasPythonToPython3) {
     out.push('echo \'alias python="python3"\' >> ~/.zshrc');
-  }
-
-  if (config.python.installPipx) {
-    out.push(...installPythonTool(config.python.pipxInstallMethod, "pipx"));
-    out.push("pipx ensurepath || true");
-  }
-
-  if (config.python.installPoetry) {
-    out.push(...installPythonTool(config.python.poetryInstallMethod, "poetry"));
   }
 
   if (config.python.installPython2) {

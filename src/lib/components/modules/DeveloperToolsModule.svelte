@@ -116,16 +116,29 @@
           />
         </label>
         <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-          <span>自动安装推荐插件</span>
+          <span>Oh My Posh</span>
           <input
             type="checkbox"
             class="h-4 w-4 accent-teal-500"
-            checked={devTools.shellCustomization.installRecommendedPlugins}
-            onchange={(event) =>
-              patchSection("shellCustomization", "installRecommendedPlugins", event.currentTarget.checked)}
+            checked={devTools.shellCustomization.ohMyPosh}
+            onchange={(event) => patchSection("shellCustomization", "ohMyPosh", event.currentTarget.checked)}
           />
         </label>
       </div>
+      {#if devTools.shellCustomization.ohMyZsh}
+        <div class="mt-2">
+          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
+            <span>自动安装推荐插件</span>
+            <input
+              type="checkbox"
+              class="h-4 w-4 accent-teal-500"
+              checked={devTools.shellCustomization.installRecommendedPlugins}
+              onchange={(event) =>
+                patchSection("shellCustomization", "installRecommendedPlugins", event.currentTarget.checked)}
+            />
+          </label>
+        </div>
+      {/if}
     </details>
 
     <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
