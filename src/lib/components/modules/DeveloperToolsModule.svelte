@@ -79,160 +79,21 @@
   class="mt-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 md:p-6"
   in:fly={{ y: 18, duration: 350 }}
 >
-  <div class="flex items-start justify-between gap-3">
+  {#if packageManager === "none"}
+    <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+      <p class="text-sm text-amber-300">
+        选择包管理器后才能安装其他开发者工具。请在第一个模块中选择 Homebrew 或 MacPorts。
+      </p>
+    </div>
+  {/if}
+
+  <div class:opacity-50={!canInstallTools} class:pointer-events-none={!canInstallTools}>
+    <div class="flex items-start justify-between gap-3">
     <div>
       <p class="text-xs font-medium tracking-wide text-teal-400">模块 6 / 6</p>
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">其他开发者工具</h2>
       <p class="mt-2 text-sm text-slate-400">按分组启用常用 CLI、服务端、数据库、容器与 GUI 工具。</p>
+</div>
     </div>
-  </div>
-
-  <div class="mt-5 space-y-3">
-    <details open class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">基础 CLI 工具</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-3">
-        {#each cliKeys as key (key)}
-          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-            <span>{key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.cliTools[key]}
-              onchange={(event) => patchSection("cliTools", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">服务器</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-3">
-        {#each serverKeys as key (key)}
-          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-            <span>{key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.servers[key]}
-              onchange={(event) => patchSection("servers", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">数据库</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-2">
-        {#each databaseKeys as key (key)}
-          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-            <span>{key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.databases[key]}
-              onchange={(event) => patchSection("databases", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">容器 & 虚拟化</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-2">
-        {#each containerKeys as key (key)}
-          <label
-            class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
-              key === "appleVirtualization" && !isMac
-                ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
-                : "border-slate-700 bg-slate-900/40 text-slate-200"
-            }`}
-            title={key === "appleVirtualization" && !isMac ? "仅 macOS 可用" : ""}
-          >
-            <span>{key === "appleVirtualization" ? "Apple Virtualization（仅 Mac）" : key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.containers[key]}
-              disabled={key === "appleVirtualization" && !isMac}
-              onchange={(event) => patchSection("containers", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-      {#if hasContainerSelected}
-        <label class="mt-3 flex items-center justify-between rounded-lg border border-teal-700/40 bg-teal-950/20 px-3 py-2 text-sm text-teal-200">
-          <span>将当前用户加入对应 group（docker / lxd 等）</span>
-          <input
-            type="checkbox"
-            class="h-4 w-4 accent-teal-500"
-            checked={devTools.containers.addCurrentUserToContainerGroups}
-            onchange={(event) =>
-              patchSection("containers", "addCurrentUserToContainerGroups", event.currentTarget.checked)}
-          />
-        </label>
-      {/if}
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">GUI 软件</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-3">
-        {#each guiKeys as key (key)}
-          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-            <span>{key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.guiApps[key]}
-              onchange={(event) => patchSection("guiApps", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">AI 工具</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-3">
-        {#each aiKeys as key (key)}
-          <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
-            <span>{key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.aiTools[key]}
-              onchange={(event) => patchSection("aiTools", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
-
-    <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <summary class="cursor-pointer text-sm font-medium text-slate-100">网络 & 调试工具</summary>
-      <div class="mt-3 grid gap-2 md:grid-cols-3">
-        {#each networkKeys as key (key)}
-          <label
-            class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
-              key === "proxyman" && !isMac
-                ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
-                : "border-slate-700 bg-slate-900/40 text-slate-200"
-            }`}
-            title={key === "proxyman" && !isMac ? "仅 macOS 可用" : ""}
-          >
-            <span>{key === "proxyman" ? "Proxyman（仅 Mac）" : key}</span>
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={devTools.networkTools[key]}
-              disabled={key === "proxyman" && !isMac}
-              onchange={(event) => patchSection("networkTools", key, event.currentTarget.checked)}
-            />
-          </label>
-        {/each}
-      </div>
-    </details>
   </div>
 </section>
