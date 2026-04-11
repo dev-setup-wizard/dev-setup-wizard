@@ -1,46 +1,48 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
   import { configStore } from "$stores/configStore";
-  import type { PythonInstallMethod, PythonVersionManager } from "$types/config";
+  import type { PythonInstallMethod, PythonToolInstallMethod } from "$types/config";
 
-  type VmOption = {
-    key: PythonVersionManager;
+  type InstallMethodOption = {
+    key: PythonInstallMethod;
     label: string;
-    tooltip: string;
   };
 
-  const vmOptions: VmOption[] = [
-    { key: "pyenv", label: "pyenv", tooltip: "经典 Python 多版本管理方案。" },
-    { key: "uv", label: "uv", tooltip: "现代高速 Python 工具链，依赖与虚拟环境体验优秀。" },
-    { key: "conda", label: "conda", tooltip: "数据科学场景常见，环境隔离能力强。" },
-    { key: "asdf", label: "asdf", tooltip: "多语言统一版本管理。" },
-    { key: "mise", label: "mise", tooltip: "现代化多语言版本管理器。" },
-    { key: "none", label: "不使用", tooltip: "不使用版本管理器，采用系统级安装。" },
+  const installMethodOptions: InstallMethodOption[] = [
+    { key: "uv", label: "uv (推荐)" },
+    { key: "pyenv", label: "pyenv" },
+    { key: "conda", label: "conda" },
+    { key: "mise", label: "mise" },
+    { key: "asdf", label: "asdf" },
+    { key: "brew", label: "Homebrew" },
+    { key: "ports", label: "MacPorts" },
+    { key: "none", label: "不安装 Python" },
   ];
 
-  const installMethodOptions: Array<{ key: PythonInstallMethod; label: string; tooltip: string }> = [
-    {
-      key: "package-manager",
-      label: "通过 brew/macports 安装",
-      tooltip: "可与系统包管理策略保持一致。",
-    },
-    {
-      key: "python-org",
-      label: "通过 python.org 官方方式",
-      tooltip: "适合不依赖包管理器的安装路径。",
-    },
+  const toolInstallOptions: { key: PythonToolInstallMethod; label: string }[] = [
+    { key: "pip", label: "pip 安装" },
+    { key: "brew", label: "Homebrew" },
+    { key: "ports", label: "MacPorts" },
+    { key: "script", label: "脚本安装" },
   ];
 
+  const selectedManagers = $derived($configStore.packageManagers.packageManagers);
   const pythonConfig = $derived($configStore.python);
 
-  function setVersionManager(next: PythonVersionManager): void {
-    configStore.patch({
-      python: {
-        ...pythonConfig,
-        pythonVersionManager: next,
-      },
-    });
-  }
+  const hasHomebrew = $derived(selectedManagers.includes("homebrew"));
+  const hasPorts = $derived(selectedManagers.includes("macports"));
+
+  const canSelectOptions = $derived(
+    pythonConfig.pythonInstallMethod !== "none",
+  );
+
+  const filteredInstallMethods = $derived(
+    installMethodOptions.map((opt) => {
+      if (opt.key === "brew" && !hasHomebrew) return null;
+      if (opt.key === "ports" && !hasPorts) return null;
+      return opt;
+    }).filter(Boolean) as InstallMethodOption[],
+  );
 
   function setInstallMethod(next: PythonInstallMethod): void {
     configStore.patch({
@@ -51,11 +53,20 @@
     });
   }
 
-  function setBoolean(key: "aliasPythonToPython3" | "installPython2", value: boolean): void {
+  function setBoolean(key: "installPythonLatest" | "aliasPythonToPython3" | "installPipx" | "installPoetry" | "installPython2", value: boolean): void {
     configStore.patch({
       python: {
         ...pythonConfig,
         [key]: value,
+      },
+    });
+  }
+
+  function setToolMethod(key: "pipxInstallMethod" | "poetryInstallMethod", next: PythonToolInstallMethod): void {
+    configStore.patch({
+      python: {
+        ...pythonConfig,
+        [key]: next,
       },
     });
   }
@@ -70,79 +81,116 @@
     <div>
       <p class="text-xs font-medium tracking-wide text-teal-400">模块 3 / 6</p>
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">Python 模块</h2>
-      <p class="mt-2 text-sm text-slate-400">配置 Python 安装策略与兼容选项。</p>
+      <p class="mt-2 text-sm text-slate-400">选择 Python 安装方式和工具。</p>
     </div>
   </div>
 
   <div class="mt-5">
-    <h3 class="text-sm font-medium text-slate-200">Python 版本管理器</h3>
-    <div class="mt-3 grid gap-2 md:grid-cols-3">
-      {#each vmOptions as option (option.key)}
-        <label
-          class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200 transition hover:border-teal-500/50"
-          title={option.tooltip}
-        >
-          <input
-            type="radio"
-            name="python-vm"
-            class="h-4 w-4 accent-teal-500"
-            checked={pythonConfig.pythonVersionManager === option.key}
-            onchange={() => setVersionManager(option.key)}
-          />
-          <span>{option.label}</span>
-        </label>
-      {/each}
+    <h3 class="text-sm font-medium text-slate-200">Python 安装方式</h3>
+    <div class="mt-2">
+      <select
+        class="w-full rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
+        value={pythonConfig.pythonInstallMethod}
+        onchange={(e) => setInstallMethod(e.currentTarget.value as PythonInstallMethod)}
+      >
+        {#each filteredInstallMethods as option (option.key)}
+          <option value={option.key}>{option.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
 
-  {#if pythonConfig.pythonVersionManager === "none"}
-    <div class="mt-5 rounded-xl border border-slate-700 bg-slate-950/30 p-4">
-      <h3 class="text-sm font-medium text-slate-200">安装方式</h3>
-      <div class="mt-3 grid gap-2 md:grid-cols-2">
-        {#each installMethodOptions as option (option.key)}
-          <label
-            class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm text-slate-200 transition hover:border-teal-500/50"
-            title={option.tooltip}
-          >
-            <input
-              type="radio"
-              name="python-install-method"
-              class="h-4 w-4 accent-teal-500"
-              checked={pythonConfig.pythonInstallMethod === option.key}
-              onchange={() => setInstallMethod(option.key)}
-            />
-            <span>{option.label}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-  {/if}
+  <div class="mt-5" class:opacity-50={!canSelectOptions} class:pointer-events-none={!canSelectOptions}>
+    <h3 class="text-sm font-medium text-slate-200">Python 选项</h3>
+    <div class="mt-3 space-y-3">
+      <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+        <span class="text-sm text-slate-200">安装 Python 最新版</span>
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={pythonConfig.installPythonLatest}
+          disabled={!canSelectOptions}
+          onchange={(event) => setBoolean("installPythonLatest", event.currentTarget.checked)}
+        />
+      </label>
 
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
-    <label
-      class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
-      title="建议大多数开发者开启，减少命令差异。"
-    >
-      <span class="text-sm text-slate-200">将 python3 设为默认 python</span>
-      <input
-        type="checkbox"
-        role="switch"
-        class="h-4 w-4 accent-teal-500"
-        checked={pythonConfig.aliasPythonToPython3}
-        onchange={(event) => setBoolean("aliasPythonToPython3", event.currentTarget.checked)}
-      />
-    </label>
-    <label
-      class="flex items-center justify-between rounded-lg border border-amber-700/40 bg-amber-950/20 px-3 py-2"
-      title="Python 2 已停止维护，除非必要不建议安装。"
-    >
-      <span class="text-sm text-amber-200">安装 Python 2（已停止维护）</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-amber-400"
-        checked={pythonConfig.installPython2}
-        onchange={(event) => setBoolean("installPython2", event.currentTarget.checked)}
-      />
-    </label>
+      <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+        <span class="text-sm text-slate-200">alias python=python3</span>
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={pythonConfig.aliasPythonToPython3}
+          disabled={!canSelectOptions}
+          onchange={(event) => setBoolean("aliasPythonToPython3", event.currentTarget.checked)}
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="mt-6 border-t border-slate-700 pt-5">
+    <h3 class="text-sm font-medium text-slate-200">Python 工具</h3>
+  </div>
+
+  <div class="mt-4 space-y-3">
+    <!-- pipx -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={pythonConfig.installPipx}
+          onchange={(event) => setBoolean("installPipx", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-slate-200">pipx</span>
+      </label>
+      {#if pythonConfig.installPipx}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={pythonConfig.pipxInstallMethod}
+          onchange={(e) => setToolMethod("pipxInstallMethod", e.currentTarget.value as PythonToolInstallMethod)}
+        >
+          {#each toolInstallOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- poetry -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={pythonConfig.installPoetry}
+          onchange={(event) => setBoolean("installPoetry", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-slate-200">poetry</span>
+      </label>
+      {#if pythonConfig.installPoetry}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={pythonConfig.poetryInstallMethod}
+          onchange={(e) => setToolMethod("poetryInstallMethod", e.currentTarget.value as PythonToolInstallMethod)}
+        >
+          {#each toolInstallOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- Python 2 (deprecated) -->
+    <div class="flex items-center justify-between rounded-lg border border-amber-700/40 bg-amber-950/20 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-amber-400"
+          checked={pythonConfig.installPython2}
+          onchange={(event) => setBoolean("installPython2", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-amber-200">Python 2 (已 EOL)</span>
+      </label>
+    </div>
   </div>
 </section>
