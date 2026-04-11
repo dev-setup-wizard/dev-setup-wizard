@@ -1,47 +1,77 @@
-# Svelte + TS + Vite
+# Dev Setup Wizard
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+一个用于配置开发者工作环境的图形化工具。用户通过 UI 选择所需的技术栈和工具，自动生成可在 macOS/Linux 上运行的 Shell 配置脚本。
 
-## Recommended IDE Setup
+## 功能特性
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- **包管理器**: Homebrew、MacPorts 选择
+- **Node.js**: fnm、nvm、n、asdf、mise 版本管理 + Yarn/pnpm/Deno/Bun
+- **Python**: pyenv、uv、conda、asdf、mise 版本管理
+- **Java**: OpenJDK/Temurin/Oracle JDK 版本选择 + Maven/Gradle/SDKMAN
+- **其他语言**: Go、Rust、Flutter、Dart
+- **开发者工具**:
+  - CLI 工具: git、openssh、tmux、jq、wget、autojump、gh
+  - 容器: Docker、Podman、Kubernetes、LXC/LXD
+  - 数据库: MySQL、MariaDB、PostgreSQL、MongoDB
+  - GUI 应用: VS Code、Android Studio、IntelliJ IDEA、Chrome 等
+  - AI 工具: Ollama、Continue、Open WebUI
+  - 网络工具: Postman、Bruno、HTTPie、Proxyman、Tailscale
 
-## Need an official Svelte framework?
+## 技术栈
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- **前端框架**: Svelte 5 (Runes API)
+- **构建工具**: Vite 8
+- **语言**: TypeScript
+- **样式**: Tailwind CSS 4 + bits-ui组件库
+- **测试**: Vitest
 
-## Technical considerations
+## 项目结构
 
-**Why use this over SvelteKit?**
-
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
 ```
+src/
+├── lib/
+│   ├── components/
+│   │   ├── modules/          # 配置模块 UI 组件
+│   │   │   ├── PackageManagersModule.svelte
+│   │   │   ├── NodeJsModule.svelte
+│   │   │   ├── PythonModule.svelte
+│   │   │   ├── JavaModule.svelte
+│   │   │   ├── OtherLanguagesModule.svelte
+│   │   │   └── DeveloperToolsModule.svelte
+│   │   └── ScriptPreviewPanel.svelte  # 脚本预览面板
+│   ├── stores/
+│   │   └── configStore.ts    # 集中式配置状态管理
+│   ├── types/
+│   │   └── config.ts        # 配置类型定义
+│   └── utils/
+│       └── generateShellScript.ts  # Shell 脚本生成器
+├── App.svelte               # 主应用组件
+└── main.ts                  # 入口文件
+```
+
+## 开发命令
+
+```bash
+# 安装依赖
+pnpm install
+
+# 启动开发服务器
+pnpm dev
+
+# 构建生产版本
+pnpm build
+
+# 类型检查
+pnpm check
+
+# 运行测试
+pnpm test
+```
+
+## 配置数据流
+
+1. 用户在 UI 组件中修改配置选项
+2. `configStore.patch()` 更新状态并持久化到 localStorage
+3. `App.svelte` 监听 `configStore` 变化
+4. 调用 `generateShellScript()` 生成脚本
+5. 右侧 `ScriptPreviewPanel` 实时显示生成的脚本内容
