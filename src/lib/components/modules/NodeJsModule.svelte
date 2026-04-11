@@ -1,45 +1,66 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
   import { configStore } from "$stores/configStore";
-  import type { NodeVersionManager } from "$types/config";
+  import type { NodeInstallMethod, NodeVersion, JsRuntimeInstallMethod } from "$types/config";
 
   type VmOption = {
-    key: NodeVersionManager;
+    key: NodeInstallMethod;
     label: string;
-    tooltip: string;
   };
 
-  const vmOptions: VmOption[] = [
-    { key: "fnm", label: "fnm", tooltip: "启动快，配置轻量，推荐优先。" },
-    { key: "nvm", label: "nvm", tooltip: "生态最广，社区资料丰富。" },
-    { key: "n", label: "n", tooltip: "使用简单，适合偏命令式习惯。" },
-    { key: "asdf", label: "asdf", tooltip: "多语言统一版本管理。" },
-    { key: "mise", label: "mise", tooltip: "现代化多语言工具链管理器。" },
-    { key: "none", label: "不使用", tooltip: "将使用官方方式安装最新稳定版 Node。" },
+  const installMethods: VmOption[] = [
+    { key: "fnm", label: "fnm (推荐)" },
+    { key: "nvm", label: "nvm" },
+    { key: "n", label: "n" },
+    { key: "asdf", label: "asdf" },
+    { key: "mise", label: "mise" },
+    { key: "brew", label: "Homebrew" },
+    { key: "ports", label: "MacPorts" },
+    { key: "none", label: "跳过（手动安装）" },
+  ];
+
+  const nodeVersionOptions: { key: NodeVersion; label: string }[] = [
+    { key: "v25", label: "v25 (Current)" },
+    { key: "v24", label: "v24 (LTS)" },
+    { key: "v22", label: "v22 (LTS)" },
+  ];
+
+  const installMethodOptions: { key: JsRuntimeInstallMethod; label: string }[] = [
+    { key: "npm-global", label: "npm 全局安装" },
+    { key: "brew", label: "Homebrew" },
+    { key: "ports", label: "MacPorts" },
+    { key: "script", label: "脚本安装" },
   ];
 
   const selectedManagers = $derived($configStore.packageManagers.packageManagers);
   const nodeConfig = $derived($configStore.node);
 
-  const denoBunDisabled = $derived(
-    selectedManagers.includes("none") &&
-      selectedManagers.length === 1 &&
-      nodeConfig.nodeVersionManager !== "asdf" &&
-      nodeConfig.nodeVersionManager !== "mise",
+  const hasHomebrew = $derived(selectedManagers.includes("homebrew"));
+  const hasPorts = $derived(selectedManagers.includes("macports"));
+  const hasPackageManager = $derived(hasHomebrew || hasPorts);
+
+  const canSelectVersions = $derived(
+    nodeConfig.nodeInstallMethod !== "none" || hasPackageManager,
   );
 
-  const denoBunDisabledTip = "需先选择包管理器或使用 asdf/mise。";
+  const filteredInstallMethods = $derived(
+    installMethods.map((opt) => {
+      if (opt.key === "brew" && !hasHomebrew) return null;
+      if (opt.key === "ports" && !hasPorts) return null;
+      return opt;
+    }).filter(Boolean) as VmOption[],
+  );
 
-  function setVersionManager(next: NodeVersionManager): void {
+  function setInstallMethod(next: NodeInstallMethod): void {
     configStore.patch({
       node: {
         ...nodeConfig,
-        nodeVersionManager: next,
+        nodeInstallMethod: next,
       },
     });
   }
 
-  function toggleNodeVersion(version: "latest" | "lts", checked: boolean): void {
+  function toggleNodeVersion(version: NodeVersion, checked: boolean): void {
     const current = nodeConfig.nodeVersions;
     const next = checked
       ? Array.from(new Set([...current, version]))
@@ -53,11 +74,20 @@
     });
   }
 
-  function setBoolean(key: "installYarn" | "installPnpm" | "installDeno" | "installBun", value: boolean): void {
+  function setBoolean(key: "installYarn" | "installPnpm" | "installDeno" | "installBun" | "enableCorepack", value: boolean): void {
     configStore.patch({
       node: {
         ...nodeConfig,
         [key]: value,
+      },
+    });
+  }
+
+  function setMethod(key: "yarnInstallMethod" | "pnpmInstallMethod" | "denoInstallMethod" | "bunInstallMethod", next: JsRuntimeInstallMethod): void {
+    configStore.patch({
+      node: {
+        ...nodeConfig,
+        [key]: next,
       },
     });
   }
@@ -72,116 +102,168 @@
     <div>
       <p class="text-xs font-medium tracking-wide text-teal-400">模块 2 / 6</p>
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">Node.js / JavaScript 模块</h2>
-      <p class="mt-2 text-sm text-slate-400">选择版本管理器、Node 版本以及常用 JS 生态工具。</p>
+      <p class="mt-2 text-sm text-slate-400">选择 Node.js 安装方式、版本以及常用 JS 生态工具。</p>
     </div>
   </div>
 
   <div class="mt-5">
-    <h3 class="text-sm font-medium text-slate-200">Node 版本管理器</h3>
-    <div class="mt-3 grid gap-2 md:grid-cols-3">
-      {#each vmOptions as option (option.key)}
-        <label
-          class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200 transition hover:border-teal-500/50"
-          title={option.tooltip}
+    <h3 class="text-sm font-medium text-slate-200">Node.js 安装方式</h3>
+    <div class="mt-2">
+      <select
+        class="w-full rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
+        value={nodeConfig.nodeInstallMethod}
+        onchange={(e) => setInstallMethod(e.currentTarget.value as NodeInstallMethod)}
+      >
+        {#each filteredInstallMethods as option (option.key)}
+          <option value={option.key}>{option.label}</option>
+        {/each}
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <h3 class="text-sm font-medium text-slate-200">希望安装的 Node 版本</h3>
+    {#if !canSelectVersions}
+      <p class="mt-1 text-xs text-amber-300">
+        需选择安装方式或包管理器才能选择版本。
+        <a
+          href="https://nodejs.org/en/download/current"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline hover:text-teal-300"
         >
+          前往官网下载
+        </a>
+      </p>
+    {/if}
+    <div class="mt-2 flex flex-wrap gap-3" class:opacity-50={!canSelectVersions} class:pointer-events-none={!canSelectVersions}>
+      {#each nodeVersionOptions as option (option.key)}
+        <label class="flex items-center gap-2 text-sm text-slate-200">
           <input
-            type="radio"
-            name="node-vm"
+            type="checkbox"
             class="h-4 w-4 accent-teal-500"
-            checked={nodeConfig.nodeVersionManager === option.key}
-            onchange={() => setVersionManager(option.key)}
+            checked={nodeConfig.nodeVersions.includes(option.key)}
+            disabled={!canSelectVersions}
+            onchange={(event) => toggleNodeVersion(option.key, event.currentTarget.checked)}
           />
-          <span>{option.label}</span>
+          {option.label}
         </label>
       {/each}
     </div>
   </div>
 
-  <div class="mt-5">
-    <h3 class="text-sm font-medium text-slate-200">希望安装的 Node 版本（可不选）</h3>
-    <div class="mt-3 flex flex-wrap gap-3">
-      <label class="flex items-center gap-2 text-sm text-slate-200" title="最新版本，适合尝鲜。">
+  <div class="mt-6 border-t border-slate-700 pt-5">
+    <h3 class="text-sm font-medium text-slate-200">JavaScript 运行时与包管理器</h3>
+  </div>
+
+  <div class="mt-4 space-y-3">
+    <!-- yarn -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.nodeVersions.includes("latest")}
-          onchange={(event) => toggleNodeVersion("latest", event.currentTarget.checked)}
+          checked={nodeConfig.installYarn}
+          onchange={(event) => setBoolean("installYarn", event.currentTarget.checked)}
         />
-        Node Latest
+        <span class="text-sm text-slate-200">yarn</span>
       </label>
-      <label class="flex items-center gap-2 text-sm text-slate-200" title="长期支持版本，推荐大多数开发者。">
+      {#if nodeConfig.installYarn}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={nodeConfig.yarnInstallMethod}
+          onchange={(e) => setMethod("yarnInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
+        >
+          {#each installMethodOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- pnpm -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.nodeVersions.includes("lts")}
-          onchange={(event) => toggleNodeVersion("lts", event.currentTarget.checked)}
+          checked={nodeConfig.installPnpm}
+          onchange={(event) => setBoolean("installPnpm", event.currentTarget.checked)}
         />
-        Node LTS
+        <span class="text-sm text-slate-200">pnpm</span>
+      </label>
+      {#if nodeConfig.installPnpm}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={nodeConfig.pnpmInstallMethod}
+          onchange={(e) => setMethod("pnpmInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
+        >
+          {#each installMethodOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- Bun -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={nodeConfig.installBun}
+          onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-slate-200">Bun</span>
+      </label>
+      {#if nodeConfig.installBun}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={nodeConfig.bunInstallMethod}
+          onchange={(e) => setMethod("bunInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
+        >
+          {#each installMethodOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- Deno -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={nodeConfig.installDeno}
+          onchange={(event) => setBoolean("installDeno", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-slate-200">Deno</span>
+      </label>
+      {#if nodeConfig.installDeno}
+        <select
+          class="rounded bg-slate-800 px-2 py-1 text-sm text-slate-200"
+          value={nodeConfig.denoInstallMethod}
+          onchange={(e) => setMethod("denoInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
+        >
+          {#each installMethodOptions as opt}
+            <option value={opt.key}>{opt.label}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+
+    <!-- corepack -->
+    <div class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-teal-500"
+          checked={nodeConfig.enableCorepack}
+          onchange={(event) => setBoolean("enableCorepack", event.currentTarget.checked)}
+        />
+        <span class="text-sm text-slate-200">corepack enable</span>
       </label>
     </div>
   </div>
-
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
-    <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <span class="text-sm text-slate-200" title="为 npm 生态补充 yarn 命令支持。">全局安装 yarn</span>
-      <input
-        type="checkbox"
-        role="switch"
-        class="h-4 w-4 accent-teal-500"
-        checked={nodeConfig.installYarn}
-        onchange={(event) => setBoolean("installYarn", event.currentTarget.checked)}
-      />
-    </label>
-    <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
-      <span class="text-sm text-slate-200" title="高性能包管理器，推荐多数现代项目。">全局安装 pnpm</span>
-      <input
-        type="checkbox"
-        role="switch"
-        class="h-4 w-4 accent-teal-500"
-        checked={nodeConfig.installPnpm}
-        onchange={(event) => setBoolean("installPnpm", event.currentTarget.checked)}
-      />
-    </label>
-  </div>
-
-  <div class="mt-5 grid gap-3 md:grid-cols-2">
-    <label
-      class={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-        denoBunDisabled
-          ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
-          : "border-slate-700 bg-slate-950/30"
-      }`}
-      title={denoBunDisabled ? denoBunDisabledTip : "安装 Deno 运行时与工具链。"}
-    >
-      <span class="text-sm">安装 Deno</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={nodeConfig.installDeno}
-        disabled={denoBunDisabled}
-        onchange={(event) => setBoolean("installDeno", event.currentTarget.checked)}
-      />
-    </label>
-    <label
-      class={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-        denoBunDisabled
-          ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500"
-          : "border-slate-700 bg-slate-950/30"
-      }`}
-      title={denoBunDisabled ? denoBunDisabledTip : "安装 Bun 运行时与包管理能力。"}
-    >
-      <span class="text-sm">安装 Bun</span>
-      <input
-        type="checkbox"
-        class="h-4 w-4 accent-teal-500"
-        checked={nodeConfig.installBun}
-        disabled={denoBunDisabled}
-        onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
-      />
-    </label>
-  </div>
-
-  {#if denoBunDisabled}
-    <p class="mt-3 text-xs text-amber-300">{denoBunDisabledTip}</p>
-  {/if}
 </section>
