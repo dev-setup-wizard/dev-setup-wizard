@@ -44,6 +44,8 @@
   const devTools = $derived($configStore.developerTools);
   const targetOs = $derived($configStore.ui.targetOs);
   const isMac = $derived(targetOs === "macos");
+  const packageManager = $derived($configStore.packageManagers.packageManagers[0] ?? "none");
+  const canInstallTools = $derived(packageManager !== "none");
 
   const hasContainerSelected = $derived(
     devTools.containers.docker ||

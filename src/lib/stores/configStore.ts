@@ -41,6 +41,25 @@ function normalizePackageManagers(input: PackageManager[]): PackageManager[] {
   return Array.from(new Set(input));
 }
 
+function validatePmDependentOptions(currentPm: PackageManager, incomingPm: PackageManager | undefined, node: any): any {
+  if (incomingPm === undefined) return node;
+  if (incomingPm === "none") {
+    return {...node, yarnInstallMethod: "npm-global", pnpmInstallMethod: "npm-global", bunInstallMethod: "npm-global", denoInstallMethod: "npm-global"};
+  }
+  const result = {...node};
+  if ((incomingPm === "homebrew" || incomingPm === "macports") && currentPm !== incomingPm) {
+    if (result.yarnInstallMethod === "ports" && incomingPm === "homebrew") result.yarnInstallMethod = "npm-global";
+    if (result.pnpmInstallMethod === "ports" && incomingPm === "homebrew") result.pnpmInstallMethod = "npm-global";
+    if (result.bunInstallMethod === "ports" && incomingPm === "homebrew") result.bunInstallMethod = "npm-global";
+    if (result.denoInstallMethod === "ports" && incomingPm === "homebrew") result.denoInstallMethod = "npm-global";
+    if (result.yarnInstallMethod === "brew" && incomingPm === "macports") result.yarnInstallMethod = "npm-global";
+    if (result.pnpmInstallMethod === "brew" && incomingPm === "macports") result.pnpmInstallMethod = "npm-global";
+    if (result.bunInstallMethod === "brew" && incomingPm === "macports") result.bunInstallMethod = "npm-global";
+    if (result.denoInstallMethod === "brew" && incomingPm === "macports") result.denoInstallMethod = "npm-global";
+  }
+  return result;
+}
+
 function createConfigStore() {
   const { subscribe, set, update } = writable<Config>(loadInitialConfig());
 
@@ -67,6 +86,11 @@ function createConfigStore() {
     },
     patch(patch: Partial<Config>) {
       update((current) => {
+        const incomingPm = patch.packageManagers?.packageManagers?.[0];
+        const currentPm = current.packageManagers.packageManagers[0];
+        
+        const validatedNode = validatePmDependentOptions(currentPm, incomingPm, patch.node ? {...current.node, ...patch.node} : null);
+        
         const next: Config = {
           ...current,
           ...patch,
@@ -77,7 +101,7 @@ function createConfigStore() {
               patch.packageManagers?.packageManagers ?? current.packageManagers.packageManagers,
             ),
           },
-          node: { ...current.node, ...patch.node },
+          node: validatedNode ? {...current.node, ...validatedNode} : {...current.node, ...patch.node},
           python: { ...current.python, ...patch.python },
           java: { ...current.java, ...patch.java },
           otherLanguages: {
