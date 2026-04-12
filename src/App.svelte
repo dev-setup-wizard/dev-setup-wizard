@@ -56,7 +56,13 @@
   function handleNavigate(module: ModuleKey) {
     const element = document.getElementById(`module-${module}`);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight + 20 : 100;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - headerHeight,
+        behavior: "smooth"
+      });
     }
   }
 </script>

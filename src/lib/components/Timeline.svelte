@@ -26,19 +26,19 @@
   }
 </script>
 
-<div class="flex items-center gap-0">
+<div class="flex items-center">
   {#each MODULE_ORDER as module, i (module)}
     {@const isActive = currentModule === module}
     {@const isPast = getCurrentIndex() > i}
     <button
       type="button"
-      class="group flex flex-col items-center"
+      class="flex items-center"
       onclick={() => onNavigate(module)}
     >
-      <div class="relative flex items-center">
-        {#if i > 0}
-          <div class={`h-0.5 w-8 transition-colors ${isPast ? 'bg-teal-500' : 'bg-slate-700'}`}></div>
-        {/if}
+      {#if i > 0}
+        <div class={`h-0.5 w-6 transition-colors ${isPast ? 'bg-teal-500' : 'bg-slate-700'}`}></div>
+      {/if}
+      <div class="flex flex-col items-center">
         <div 
           class={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${
             isActive 
@@ -54,12 +54,12 @@
             </svg>
           {/if}
         </div>
+        <span class={`mt-1 text-[10px] font-medium whitespace-nowrap transition-colors ${
+          isActive ? 'text-teal-400' : 'text-slate-500'
+        }`}>
+          {moduleLabels[module]}
+        </span>
       </div>
-      <span class={`mt-1 text-[10px] font-medium whitespace-nowrap transition-colors ${
-        isActive ? 'text-teal-400' : 'text-slate-500'
-      }`}>
-        {moduleLabels[module]}
-      </span>
     </button>
   {/each}
 </div>
