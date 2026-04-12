@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Timeline from "$components/Timeline.svelte";
   import ScriptPreviewPanel from "$components/ScriptPreviewPanel.svelte";
   import DeveloperToolsModule from "$components/modules/DeveloperToolsModule.svelte";
   import JavaModule from "$components/modules/JavaModule.svelte";
@@ -7,58 +8,70 @@
   import OtherLanguagesModule from "$components/modules/OtherLanguagesModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import PythonModule from "$components/modules/PythonModule.svelte";
-  import ShellModule from "$components/modules/ShellModule.svelte";
-  import { completionPercentStore, configStore } from "$stores/configStore";
+  import { configStore } from "$stores/configStore";
   import { generateShellScript } from "$utils/generateShellScript";
+  import { type ModuleKey, MODULE_ORDER } from "$types/config";
 
   const title = "开发者环境一键配置器";
-  const completionPercent = $derived($completionPercentStore);
+  let currentModule = $state<ModuleKey>("package-managers");
   let scriptOutput = $state(generateShellScript($configStore));
-  let isGenerating = $state(false);
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   onMount(() => {
-    configStore.setCurrentModule("package-managers");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const id = entry.target.id.replace('module-', '') as ModuleKey;
+            if (MODULE_ORDER.includes(id)) {
+              currentModule = id;
+              configStore.setCurrentModule(id);
+            }
+            break;
+          }
+        }
+      },
+      { rootMargin: "-20% 0px -60% 0px" }
+    );
+    
+    MODULE_ORDER.forEach(key => {
+      const el = document.getElementById(`module-${key}`);
+      if (el) observer.observe(el);
+    });
+    
+    return () => observer.disconnect();
   });
 
   $effect(() => {
     const cfg = $configStore;
-    isGenerating = true;
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       scriptOutput = generateShellScript(cfg);
-      isGenerating = false;
     }, 300);
-
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
     };
   });
+
+  function handleNavigate(module: ModuleKey) {
+    const element = document.getElementById(`module-${module}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 </script>
 
 <div class="flex">
   <main class="mx-auto min-h-screen w-full max-w-[1400px] flex-1 px-4 py-8 md:px-6">
-    <header class="sticky top-4 z-20 mb-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 backdrop-blur">
+    <header class="sticky top-4 z-20 mb-6 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-4 backdrop-blur">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="text-xs font-medium tracking-wide text-teal-400">dev-setup-wizard</p>
           <h1 class="text-lg font-semibold text-slate-100 md:text-xl">{title}</h1>
         </div>
-        <button
-          class="flex items-center gap-2 rounded-lg border border-teal-500/40 bg-teal-500/10 px-4 py-2 text-sm font-medium text-teal-300 transition hover:bg-teal-500/20"
-          type="button"
-        >
-          生成脚本
-        </button>
       </div>
-      <div class="mt-3">
-        <div class="mb-1 flex items-center justify-between text-xs text-slate-400">
-          <span>当前进度</span>
-          <span>{completionPercent}%</span>
-        </div>
-        <div class="h-2 rounded-full bg-slate-800">
-          <div class="h-2 rounded-full bg-teal-500 transition-all duration-300" style={`width: ${completionPercent}%`}></div>
-        </div>
+      <div class="mt-4 flex justify-center">
+        <Timeline {currentModule} onNavigate={handleNavigate} />
       </div>
     </header>
 
@@ -69,11 +82,10 @@
         <PythonModule />
         <JavaModule />
         <OtherLanguagesModule />
-        <ShellModule />
         <DeveloperToolsModule />
       </div>
-      <div class="lg:sticky lg:top-28 lg:self-start">
-        <ScriptPreviewPanel script={scriptOutput} {isGenerating} />
+      <div class="lg:sticky lg:top-36 lg:self-start">
+        <ScriptPreviewPanel script={scriptOutput} isGenerating={false} />
       </div>
     </div>
   </main>
