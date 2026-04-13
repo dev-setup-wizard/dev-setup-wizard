@@ -46,7 +46,7 @@
           </svg>
         {/if}
       </button>
-      <span class="mt-1 text-[10px] font-medium text-center leading-tight transition-colors {isActive ? 'text-teal-400' : 'text-slate-500'}">
+      <span class="mt-1 text-[10px] font-medium text-center leading-tight transition-colors {isActive ? 'text-teal-400' : 'text-slate-500'} whitespace-nowrap">
         {moduleLabels[module]}
       </span>
     </div>
