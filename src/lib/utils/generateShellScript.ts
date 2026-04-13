@@ -70,6 +70,7 @@ export function generateShellScript(config: Config): string {
   }
 
   if (useVm) {
+    let setDefaultVer: string | false = false;
     switch (installMethod) {
       case "fnm":
         out.push(
@@ -78,19 +79,24 @@ export function generateShellScript(config: Config): string {
             : 'curl -fsSL https://fnm.vercel.app/install | bash',
         );
         if (hasNodeSelection) {
-          if (nodeVersions.includes("v22")) out.push('fnm install 22');
-          if (nodeVersions.includes("v24")) out.push('fnm install 24');
-          if (nodeVersions.includes("v25")) out.push('fnm install 25');
-          out.push('fnm default 22 || true');
+          if (nodeVersions.includes("v25")) { out.push('fnm install 25'); setDefaultVer = setDefaultVer || "25"; }
+          if (nodeVersions.includes("v24")) { out.push('fnm install 24'); setDefaultVer = setDefaultVer || "24"; }
+          if (nodeVersions.includes("v22")) { out.push('fnm install 22'); setDefaultVer = setDefaultVer || "22"; }
+          if (setDefaultVer) {
+            out.push(`fnm default ${setDefaultVer} || true`);
+          }
         }
         break;
       case "nvm":
         out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("v22")) out.push('nvm install 22');
-          if (nodeVersions.includes("v24")) out.push('nvm install 24');
-          if (nodeVersions.includes("v25")) out.push('nvm install 25');
-          out.push('nvm alias default 22 || true');
+
+          if (nodeVersions.includes("v25")) { out.push('nvm install 25'); setDefaultVer = setDefaultVer || "25"; }
+          if (nodeVersions.includes("v24")) { out.push('nvm install 24'); setDefaultVer = setDefaultVer || "24"; }
+          if (nodeVersions.includes("v22")) { out.push('nvm install 22'); setDefaultVer = setDefaultVer || "22"; }
+          if (setDefaultVer) {
+            out.push(`nvm alias default ${setDefaultVer} || true`);
+          }
         }
         break;
       case "n":
@@ -100,10 +106,13 @@ export function generateShellScript(config: Config): string {
             : "npm i -g n || true",
         );
         if (hasNodeSelection) {
-          if (nodeVersions.includes("v22")) out.push('n 22');
-          if (nodeVersions.includes("v24")) out.push('n 24');
-          if (nodeVersions.includes("v25")) out.push('n 25');
-          out.push('n alias default 22 || true');
+
+          if (nodeVersions.includes("v25")) { out.push('n 25'); setDefaultVer = setDefaultVer || "25"; }
+          if (nodeVersions.includes("v24")) { out.push('n 24'); setDefaultVer = setDefaultVer || "24"; }
+          if (nodeVersions.includes("v22")) { out.push('n 22'); setDefaultVer = setDefaultVer || "22"; }
+          if (setDefaultVer) {
+            out.push(`n alias default ${setDefaultVer} || true`);
+          }
         }
         break;
       case "asdf":
@@ -114,19 +123,25 @@ export function generateShellScript(config: Config): string {
         );
         out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("v22")) out.push('asdf install nodejs 22');
-          if (nodeVersions.includes("v24")) out.push('asdf install nodejs 24');
-          if (nodeVersions.includes("v25")) out.push('asdf install nodejs 25');
-          out.push('asdf global nodejs 22 || true');
+
+          if (nodeVersions.includes("v25")) { out.push('asdf install nodejs 25'); setDefaultVer = setDefaultVer || "25"; }
+          if (nodeVersions.includes("v24")) { out.push('asdf install nodejs 24'); setDefaultVer = setDefaultVer || "24"; }
+          if (nodeVersions.includes("v22")) { out.push('asdf install nodejs 22'); setDefaultVer = setDefaultVer || "22"; }
+          if (setDefaultVer) {
+            out.push(`asdf global nodejs ${setDefaultVer} || true`);
+          }
         }
         break;
       case "mise":
         out.push('curl https://mise.run | sh');
         if (hasNodeSelection) {
-          if (nodeVersions.includes("v22")) out.push('mise install nodejs 22');
-          if (nodeVersions.includes("v24")) out.push('mise install nodejs 24');
-          if (nodeVersions.includes("v25")) out.push('mise install nodejs 25');
-          out.push('mise use nodejs 22 || true');
+
+          if (nodeVersions.includes("v25")) { out.push('mise install nodejs 25'); setDefaultVer = setDefaultVer || "25"; }
+          if (nodeVersions.includes("v24")) { out.push('mise install nodejs 24'); setDefaultVer = setDefaultVer || "24"; }
+          if (nodeVersions.includes("v22")) { out.push('mise install nodejs 22'); setDefaultVer = setDefaultVer || "22"; }
+          if (setDefaultVer) {
+            out.push(`mise use nodejs ${setDefaultVer} || true`);
+          }
         }
         break;
     }
@@ -288,7 +303,7 @@ export function generateShellScript(config: Config): string {
   const pm = hasPackageManager(config) ? preferredPm : "none";
   if (pm !== "none") {
     out.push("# ---- Developer Tools ----");
-    
+
     const cliPackages = Object.entries(config.developerTools.cliTools)
       .filter(([, enabled]) => enabled)
       .map(([name]) => name);

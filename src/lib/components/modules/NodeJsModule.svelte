@@ -211,7 +211,7 @@
           checked={nodeConfig.enableCorepack}
           onchange={(event) => setBoolean("enableCorepack", event.currentTarget.checked)}
         />
-        <span class="text-sm text-slate-200">corepack</span>
+        <span class="text-sm text-slate-200">corepack enable</span>
       </div>
     </label>
 
