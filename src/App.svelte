@@ -68,7 +68,7 @@
 </script>
 
 <main class="mx-auto min-h-screen w-full max-w-[1400px] px-4 py-4">
-  <header class="sticky top-4 z-20 mb-4 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-4 backdrop-blur opacity-55">
+  <header class="sticky top-4 z-20 mb-4 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-4 backdrop-blur">
     <div class="flex items-center justify-between gap-4">
       <div>
         <p class="text-xs font-medium tracking-wide text-teal-400">dev-setup-wizard</p>
@@ -91,7 +91,7 @@
       <DeveloperToolsModule />
     </div>
     <div class="lg:sticky lg:top-[128px] lg:self-start h-[calc(100vh-145px)] overflow-y-auto flex flex-col">    
-     <ScriptPreviewPanel script={scriptOutput} isGenerating={false} />
+     <ScriptPreviewPanel script={scriptOutput} />
     </div>
   </div>
 </main>

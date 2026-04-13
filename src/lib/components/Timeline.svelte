@@ -30,10 +30,11 @@
   {#each MODULE_ORDER as module, i (module)}
     {@const isActive = currentModule === module}
     {@const isPast = getCurrentIndex() > i}
+    {@const lineHighlighted = isPast || isActive}
     {#if i > 0}
-      <div class="h-0.5 w-4 bg-slate-700 mt-[10px] {isPast ? 'bg-teal-500' : ''}"></div>
+      <div class="h-0.5 w-4 bg-slate-700 mt-[10px] {lineHighlighted ? 'bg-teal-500' : ''}"></div>
     {/if}
-    <div class="flex flex-col items-center">
+    <div class="flex w-12 flex-col items-center">
       <button
         type="button"
         class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all {isActive ? 'border-teal-400 bg-teal-500' : isPast ? 'border-teal-500 bg-teal-500/20' : 'border-slate-600 bg-slate-800'}"
@@ -45,7 +46,7 @@
           </svg>
         {/if}
       </button>
-      <span class="mt-1 text-[10px] font-medium whitespace-nowrap transition-colors {isActive ? 'text-teal-400' : 'text-slate-500'}">
+      <span class="mt-1 text-[10px] font-medium text-center leading-tight transition-colors {isActive ? 'text-teal-400' : 'text-slate-500'}">
         {moduleLabels[module]}
       </span>
     </div>
