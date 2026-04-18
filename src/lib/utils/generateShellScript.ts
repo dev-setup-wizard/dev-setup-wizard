@@ -57,7 +57,14 @@ export function generateShellScript(config: Config): string {
   const nodeVersions = config.node.nodeVersions;
   const hasNodeSelection = nodeVersions.length > 0;
   const installMethod = config.node.nodeInstallMethod;
-  const useVm = installMethod !== "none" && installMethod !== "brew" && installMethod !== "ports";
+
+  function getLatestVersion(versions: string[]): string {
+    if (versions.length === 0) return "";
+    const nums = versions.map(v => parseInt(v.replace("v", ""), 10));
+    return String(Math.max(...nums));
+  }
+
+  const latestVersion = getLatestVersion(nodeVersions);
 
   function installByMethod(pkg: string, method: string): string[] {
     switch (method) {
@@ -81,16 +88,14 @@ export function generateShellScript(config: Config): string {
           if (nodeVersions.includes("v25")) out.push('fnm install 25');
           if (nodeVersions.includes("v24")) out.push('fnm install 24');
           if (nodeVersions.includes("v22")) out.push('fnm install 22');
-          const fnmLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) out.push(`fnm default ${fnmLatest} || true`);
+          if (latestVersion) out.push(`fnm default ${latestVersion} || true`);
           break;
         case "nvm":
           out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
           if (nodeVersions.includes("v25")) out.push('nvm install 25');
           if (nodeVersions.includes("v24")) out.push('nvm install 24');
           if (nodeVersions.includes("v22")) out.push('nvm install 22');
-          const nvmLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) out.push(`nvm alias default ${nvmLatest} || true`);
+          if (latestVersion) out.push(`nvm alias default ${latestVersion} || true`);
           break;
         case "n":
           out.push(
@@ -101,8 +106,7 @@ export function generateShellScript(config: Config): string {
           if (nodeVersions.includes("v25")) out.push('n 25');
           if (nodeVersions.includes("v24")) out.push('n 24');
           if (nodeVersions.includes("v22")) out.push('n 22');
-          const nLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) out.push(`n alias default ${nLatest} || true`);
+          if (latestVersion) out.push(`n alias default ${latestVersion} || true`);
           break;
         case "asdf":
           out.push(
@@ -114,32 +118,28 @@ export function generateShellScript(config: Config): string {
           if (nodeVersions.includes("v25")) out.push('asdf install nodejs 25');
           if (nodeVersions.includes("v24")) out.push('asdf install nodejs 24');
           if (nodeVersions.includes("v22")) out.push('asdf install nodejs 22');
-          const asdfLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) out.push(`asdf global nodejs ${asdfLatest} || true`);
+          if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
           break;
         case "mise":
           out.push('curl https://mise.run | sh');
           if (nodeVersions.includes("v25")) out.push('mise install nodejs 25');
           if (nodeVersions.includes("v24")) out.push('mise install nodejs 24');
           if (nodeVersions.includes("v22")) out.push('mise install nodejs 22');
-          const miseLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) out.push(`mise use nodejs ${miseLatest} || true`);
+          if (latestVersion) out.push(`mise use nodejs ${latestVersion} || true`);
           break;
         case "brew":
           const brewVersions = nodeVersions.map(v => `node@${v}`);
           out.push(...addInstallByPackageManager("homebrew", brewVersions));
-          const brewLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) {
+          if (latestVersion) {
             out.push(`brew unlink node || true`);
-            out.push(`brew link node@${brewLatest} || true`);
+            out.push(`brew link node@${latestVersion} || true`);
           }
           break;
         case "ports":
           const portsVersions = nodeVersions.map(v => `node${v}`);
           out.push(...addInstallByPackageManager("macports", portsVersions));
-          const portsLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
-          if (nodeVersions.length > 0) {
-            out.push(`port select node node${portsLatest} || true`);
+          if (latestVersion) {
+            out.push(`port select node node${latestVersion} || true`);
           }
           break;
       }
