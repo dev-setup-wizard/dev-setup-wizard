@@ -14,8 +14,15 @@
 
   const title = "开发者环境一键配置器";
   let currentModule = $state<ModuleKey>("package-managers");
-  let scriptOutput = $state(generateShellScript($configStore));
+  let scriptOutput = $state("");
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  $effect(() => {
+    const cfg = $configStore;
+    if (cfg) {
+      scriptOutput = generateShellScript(cfg);
+    }
+  });
 
   onMount(() => {
     const observer = new IntersectionObserver(

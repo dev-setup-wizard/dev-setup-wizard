@@ -279,9 +279,15 @@ export function generateShellScript(config: Config): string {
 
   // Other languages
   out.push("# ---- Other Languages ----");
-  if (config.otherLanguages.goEnabled) out.push(...addInstallByPackageManager(preferredPm, ["go"]));
-  if (config.otherLanguages.rustEnabled) out.push("curl https://sh.rustup.rs -sSf | sh -s -- -y");
-  if (config.otherLanguages.dartEnabled) out.push(...addInstallByPackageManager(preferredPm, ["dart"]));
+  if (config.otherLanguages.go.enabled) {
+    const goMethod = config.otherLanguages.go.installMethod === "mise" ? "none" : config.otherLanguages.go.installMethod === "brew" ? "homebrew" : config.otherLanguages.go.installMethod === "ports" ? "macports" : "none";
+    out.push(...addInstallByPackageManager(goMethod, ["go"]));
+  }
+  if (config.otherLanguages.rust.enabled) out.push(...installByScript("rust"));
+  if (config.otherLanguages.dart.enabled) {
+    const dartMethod = config.otherLanguages.dart.installMethod === "mise" ? "none" : config.otherLanguages.dart.installMethod === "brew" ? "homebrew" : config.otherLanguages.dart.installMethod === "ports" ? "macports" : "none";
+    out.push(...addInstallByPackageManager(dartMethod, ["dart"]));
+  }
   if (config.otherLanguages.otherEnabled && config.otherLanguages.otherName.trim()) {
     out.push(`# custom language: ${config.otherLanguages.otherName.trim()}`);
   }

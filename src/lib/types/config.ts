@@ -42,10 +42,17 @@ export interface JavaConfig {
   jdkVersions: JdkVersion[];
 }
 
+export type LanguageInstallMethod = "brew" | "ports" | "mise";
+
+export interface LanguageConfig {
+  enabled: boolean;
+  installMethod: LanguageInstallMethod;
+}
+
 export interface OtherLanguagesConfig {
-  goEnabled: boolean;
-  rustEnabled: boolean;
-  dartEnabled: boolean;
+  go: LanguageConfig;
+  rust: LanguageConfig;
+  dart: LanguageConfig;
   otherEnabled: boolean;
   otherName: string;
 }
@@ -195,9 +202,9 @@ export const defaultConfig: Config = {
     jdkVersions: ["21"],
   },
   otherLanguages: {
-    goEnabled: false,
-    rustEnabled: false,
-    dartEnabled: false,
+    go: { enabled: false, installMethod: "brew" },
+    rust: { enabled: false, installMethod: "brew" },
+    dart: { enabled: false, installMethod: "brew" },
     otherEnabled: false,
     otherName: "",
   },

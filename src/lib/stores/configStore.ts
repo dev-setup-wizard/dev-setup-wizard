@@ -24,8 +24,62 @@ function safeParseConfig(value: string | null): Config | null {
 
 function loadInitialConfig(): Config {
   if (!isBrowser()) return defaultConfig;
-  const parsed = safeParseConfig(window.localStorage.getItem(STORAGE_KEY));
-  return parsed ?? defaultConfig;
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (!stored) return defaultConfig;
+  const parsed = safeParseConfig(stored);
+  if (!parsed) return defaultConfig;
+  // Ensure all properties exist by merging with defaultConfig
+  return {
+    ...defaultConfig,
+    ...parsed,
+    packageManagers: {
+      ...defaultConfig.packageManagers,
+      ...parsed.packageManagers,
+    },
+    node: {
+      ...defaultConfig.node,
+      ...parsed.node,
+    },
+    python: {
+      ...defaultConfig.python,
+      ...parsed.python,
+    },
+    java: {
+      ...defaultConfig.java,
+      ...parsed.java,
+    },
+    otherLanguages: {
+      ...defaultConfig.otherLanguages,
+      ...parsed.otherLanguages,
+      go: { ...defaultConfig.otherLanguages.go, ...parsed.otherLanguages?.go },
+      rust: { ...defaultConfig.otherLanguages.rust, ...parsed.otherLanguages?.rust },
+      dart: { ...defaultConfig.otherLanguages.dart, ...parsed.otherLanguages?.dart },
+    },
+    developerTools: {
+      ...defaultConfig.developerTools,
+      ...parsed.developerTools,
+      cliTools: { ...defaultConfig.developerTools.cliTools, ...parsed.developerTools?.cliTools },
+      shellCustomization: {
+        ...defaultConfig.developerTools.shellCustomization,
+        ...parsed.developerTools?.shellCustomization,
+      },
+      servers: { ...defaultConfig.developerTools.servers, ...parsed.developerTools?.servers },
+      databases: { ...defaultConfig.developerTools.databases, ...parsed.developerTools?.databases },
+      containers: { ...defaultConfig.developerTools.containers, ...parsed.developerTools?.containers },
+      guiApps: { ...defaultConfig.developerTools.guiApps, ...parsed.developerTools?.guiApps },
+      aiTools: { ...defaultConfig.developerTools.aiTools, ...parsed.developerTools?.aiTools },
+      networkTools: {
+        ...defaultConfig.developerTools.networkTools,
+        ...parsed.developerTools?.networkTools,
+      },
+    },
+    ui: {
+      ...defaultConfig.ui,
+      ...parsed.ui,
+      // Always reset current module to first one or use default if invalid
+      currentModuleKey: parsed.ui?.currentModuleKey ?? defaultConfig.ui.currentModuleKey,
+    },
+  };
 }
 
 function persistConfig(config: Config): void {
@@ -83,7 +137,11 @@ function createConfigStore() {
           java: { ...current.java, ...patch.java },
           otherLanguages: {
             ...current.otherLanguages,
-            ...patch.otherLanguages,
+            go: { ...current.otherLanguages.go, ...patch.otherLanguages?.go },
+            rust: { ...current.otherLanguages.rust, ...patch.otherLanguages?.rust },
+            dart: { ...current.otherLanguages.dart, ...patch.otherLanguages?.dart },
+            otherEnabled: patch.otherLanguages?.otherEnabled ?? current.otherLanguages.otherEnabled,
+            otherName: patch.otherLanguages?.otherName ?? current.otherLanguages.otherName,
           },
           developerTools: {
             ...current.developerTools,
@@ -158,9 +216,9 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
       );
     case "other-languages":
       return (
-        config.otherLanguages.goEnabled ||
-        config.otherLanguages.rustEnabled ||
-        config.otherLanguages.dartEnabled ||
+        config.otherLanguages.go.enabled ||
+        config.otherLanguages.rust.enabled ||
+        config.otherLanguages.dart.enabled ||
         (config.otherLanguages.otherEnabled && config.otherLanguages.otherName.trim().length > 0)
       );
     case "developer-tools":
