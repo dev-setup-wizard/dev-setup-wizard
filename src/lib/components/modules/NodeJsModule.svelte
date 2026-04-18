@@ -16,7 +16,6 @@
     { key: "fnm", label: "fnm (推荐)" },
     { key: "nvm", label: "nvm" },
     { key: "n", label: "n" },
-    { key: "asdf", label: "asdf" },
     { key: "mise", label: "mise" },
     { key: "brew", label: "Homebrew" },
     { key: "ports", label: "MacPorts" },

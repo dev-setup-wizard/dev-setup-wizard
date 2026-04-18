@@ -13,7 +13,6 @@ function installByScript(pkg: string): string[] {
     fnm: 'curl -fsSL https://fnm.vercel.app/install | bash',
     nvm: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash',
     n: 'curl -L https://bit.ly/n-install | bash',
-    asdf: 'git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true',
     mise: 'curl https://mise.run | sh',
     corepack: 'npm i -g corepack || true',
     yarn: 'npm i -g yarn || true',
@@ -136,16 +135,10 @@ export function generateShellScript(config: Config): string {
           installNodeVersions((v) => `n ${v}`);
           if (latestVersion) out.push(`n alias default ${latestVersion} || true`);
           break;
-        case "asdf":
-          out.push(...addInstallByPackageManager(preferredPm, ["asdf"]));
-          out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
-          installNodeVersions((v) => `asdf install nodejs ${v}`);
-          if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
-          break;
         case "mise":
           out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
-          installNodeVersions((v) => `mise install nodejs ${v}`);
-          if (latestVersion) out.push(`mise use nodejs ${latestVersion} || true`);
+          installNodeVersions((v) => `mise install node@${v}`);
+          if (latestVersion) out.push(`mise use -g node@${latestVersion} || true`);
           break;
         case "brew":
           const brewVersions = nodeVersions.map(v => `node@${v}`);
@@ -224,9 +217,6 @@ export function generateShellScript(config: Config): string {
       case "mise": 
         out.push(...addInstallByPackageManager(preferredPm, ["mise"])); 
         break;
-      case "asdf": 
-        out.push(...addInstallByPackageManager(preferredPm, ["asdf"])); 
-        break;
       case "brew": 
         out.push(...addInstallByPackageManager("homebrew", ["python"])); 
         break;
@@ -271,12 +261,6 @@ export function generateShellScript(config: Config): string {
         out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
         for (const v of config.java.jdkVersions) {
           out.push(`mise install java ${jdkPrefix}-${v} || true`);
-        }
-        break;
-      case "asdf":
-        out.push(...addInstallByPackageManager(preferredPm, ["asdf"]));
-        for (const v of config.java.jdkVersions) {
-          out.push(`asdf install java ${jdkPrefix}-${v} || true`);
         }
         break;
       case "brew":
