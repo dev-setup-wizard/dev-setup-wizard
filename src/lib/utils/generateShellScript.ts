@@ -66,6 +66,16 @@ export function generateShellScript(config: Config): string {
 
   const latestVersion = getLatestVersion(nodeVersions);
 
+  function installNodeVersions(installCmd: (v: string) => string): void {
+    for (const v of nodeVersions) {
+      const ver = v.replace("v", "");
+      out.push(installCmd(ver));
+    }
+    if (latestVersion) {
+      out.push(`# Set default version to ${latestVersion}`);
+    }
+  }
+
   function installByMethod(pkg: string, method: string): string[] {
     switch (method) {
       case "npm-global": return [`npm i -g ${pkg} || true`];
@@ -85,16 +95,12 @@ export function generateShellScript(config: Config): string {
               ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
               : 'curl -fsSL https://fnm.vercel.app/install | bash',
           );
-          if (nodeVersions.includes("v25")) out.push('fnm install 25');
-          if (nodeVersions.includes("v24")) out.push('fnm install 24');
-          if (nodeVersions.includes("v22")) out.push('fnm install 22');
+          installNodeVersions((v) => `fnm install ${v}`);
           if (latestVersion) out.push(`fnm default ${latestVersion} || true`);
           break;
         case "nvm":
           out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
-          if (nodeVersions.includes("v25")) out.push('nvm install 25');
-          if (nodeVersions.includes("v24")) out.push('nvm install 24');
-          if (nodeVersions.includes("v22")) out.push('nvm install 22');
+          installNodeVersions((v) => `nvm install ${v}`);
           if (latestVersion) out.push(`nvm alias default ${latestVersion} || true`);
           break;
         case "n":
@@ -103,9 +109,7 @@ export function generateShellScript(config: Config): string {
               ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
               : "npm i -g n || true",
           );
-          if (nodeVersions.includes("v25")) out.push('n 25');
-          if (nodeVersions.includes("v24")) out.push('n 24');
-          if (nodeVersions.includes("v22")) out.push('n 22');
+          installNodeVersions((v) => `n ${v}`);
           if (latestVersion) out.push(`n alias default ${latestVersion} || true`);
           break;
         case "asdf":
@@ -115,16 +119,12 @@ export function generateShellScript(config: Config): string {
               : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
           );
           out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
-          if (nodeVersions.includes("v25")) out.push('asdf install nodejs 25');
-          if (nodeVersions.includes("v24")) out.push('asdf install nodejs 24');
-          if (nodeVersions.includes("v22")) out.push('asdf install nodejs 22');
+          installNodeVersions((v) => `asdf install nodejs ${v}`);
           if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
           break;
         case "mise":
           out.push('curl https://mise.run | sh');
-          if (nodeVersions.includes("v25")) out.push('mise install nodejs 25');
-          if (nodeVersions.includes("v24")) out.push('mise install nodejs 24');
-          if (nodeVersions.includes("v22")) out.push('mise install nodejs 22');
+          installNodeVersions((v) => `mise install nodejs ${v}`);
           if (latestVersion) out.push(`mise use nodejs ${latestVersion} || true`);
           break;
         case "brew":
