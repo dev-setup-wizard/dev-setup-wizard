@@ -69,98 +69,82 @@ export function generateShellScript(config: Config): string {
     }
   }
 
-  if (useVm) {
-    let setDefaultVer: string | false = false;
-    switch (installMethod) {
-      case "fnm":
-        out.push(
-          preferredPm !== "none"
-            ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
-            : 'curl -fsSL https://fnm.vercel.app/install | bash',
-        );
-        if (hasNodeSelection) {
-          if (nodeVersions.includes("v25")) { out.push('fnm install 25'); setDefaultVer = setDefaultVer || "25"; }
-          if (nodeVersions.includes("v24")) { out.push('fnm install 24'); setDefaultVer = setDefaultVer || "24"; }
-          if (nodeVersions.includes("v22")) { out.push('fnm install 22'); setDefaultVer = setDefaultVer || "22"; }
-          if (setDefaultVer) {
-            out.push(`fnm default ${setDefaultVer} || true`);
-          }
-        }
-        break;
-      case "nvm":
-        out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
-        if (hasNodeSelection) {
-
-          if (nodeVersions.includes("v25")) { out.push('nvm install 25'); setDefaultVer = setDefaultVer || "25"; }
-          if (nodeVersions.includes("v24")) { out.push('nvm install 24'); setDefaultVer = setDefaultVer || "24"; }
-          if (nodeVersions.includes("v22")) { out.push('nvm install 22'); setDefaultVer = setDefaultVer || "22"; }
-          if (setDefaultVer) {
-            out.push(`nvm alias default ${setDefaultVer} || true`);
-          }
-        }
-        break;
-      case "n":
-        out.push(
-          preferredPm !== "none"
-            ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
-            : "npm i -g n || true",
-        );
-        if (hasNodeSelection) {
-
-          if (nodeVersions.includes("v25")) { out.push('n 25'); setDefaultVer = setDefaultVer || "25"; }
-          if (nodeVersions.includes("v24")) { out.push('n 24'); setDefaultVer = setDefaultVer || "24"; }
-          if (nodeVersions.includes("v22")) { out.push('n 22'); setDefaultVer = setDefaultVer || "22"; }
-          if (setDefaultVer) {
-            out.push(`n alias default ${setDefaultVer} || true`);
-          }
-        }
-        break;
-      case "asdf":
-        out.push(
-          preferredPm !== "none"
-            ? lines(...addInstallByPackageManager(preferredPm, ["asdf"]))
-            : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
-        );
-        out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
-        if (hasNodeSelection) {
-
-          if (nodeVersions.includes("v25")) { out.push('asdf install nodejs 25'); setDefaultVer = setDefaultVer || "25"; }
-          if (nodeVersions.includes("v24")) { out.push('asdf install nodejs 24'); setDefaultVer = setDefaultVer || "24"; }
-          if (nodeVersions.includes("v22")) { out.push('asdf install nodejs 22'); setDefaultVer = setDefaultVer || "22"; }
-          if (setDefaultVer) {
-            out.push(`asdf global nodejs ${setDefaultVer} || true`);
-          }
-        }
-        break;
-      case "mise":
-        out.push('curl https://mise.run | sh');
-        if (hasNodeSelection) {
-          if (nodeVersions.includes("v25")) { out.push('mise install nodejs 25'); setDefaultVer = setDefaultVer || "25"; }
-          if (nodeVersions.includes("v24")) { out.push('mise install nodejs 24'); setDefaultVer = setDefaultVer || "24"; }
-          if (nodeVersions.includes("v22")) { out.push('mise install nodejs 22'); setDefaultVer = setDefaultVer || "22"; }
-          if (setDefaultVer) {
-            out.push(`mise use nodejs ${setDefaultVer} || true`);
-          }
-        }
-        break;
-    }
-  } else if (installMethod === "brew") {
+  if (installMethod !== "none") {
     if (hasNodeSelection) {
-      for (const v of config.node.nodeVersions) {
-        out.push(...addInstallByPackageManager("homebrew", [`node@${v}`]));
+      switch (installMethod) {
+        case "fnm":
+          out.push(
+            preferredPm !== "none"
+              ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
+              : 'curl -fsSL https://fnm.vercel.app/install | bash',
+          );
+          if (nodeVersions.includes("v25")) out.push('fnm install 25');
+          if (nodeVersions.includes("v24")) out.push('fnm install 24');
+          if (nodeVersions.includes("v22")) out.push('fnm install 22');
+          const fnmLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) out.push(`fnm default ${fnmLatest} || true`);
+          break;
+        case "nvm":
+          out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
+          if (nodeVersions.includes("v25")) out.push('nvm install 25');
+          if (nodeVersions.includes("v24")) out.push('nvm install 24');
+          if (nodeVersions.includes("v22")) out.push('nvm install 22');
+          const nvmLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) out.push(`nvm alias default ${nvmLatest} || true`);
+          break;
+        case "n":
+          out.push(
+            preferredPm !== "none"
+              ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
+              : "npm i -g n || true",
+          );
+          if (nodeVersions.includes("v25")) out.push('n 25');
+          if (nodeVersions.includes("v24")) out.push('n 24');
+          if (nodeVersions.includes("v22")) out.push('n 22');
+          const nLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) out.push(`n alias default ${nLatest} || true`);
+          break;
+        case "asdf":
+          out.push(
+            preferredPm !== "none"
+              ? lines(...addInstallByPackageManager(preferredPm, ["asdf"]))
+              : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
+          );
+          out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
+          if (nodeVersions.includes("v25")) out.push('asdf install nodejs 25');
+          if (nodeVersions.includes("v24")) out.push('asdf install nodejs 24');
+          if (nodeVersions.includes("v22")) out.push('asdf install nodejs 22');
+          const asdfLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) out.push(`asdf global nodejs ${asdfLatest} || true`);
+          break;
+        case "mise":
+          out.push('curl https://mise.run | sh');
+          if (nodeVersions.includes("v25")) out.push('mise install nodejs 25');
+          if (nodeVersions.includes("v24")) out.push('mise install nodejs 24');
+          if (nodeVersions.includes("v22")) out.push('mise install nodejs 22');
+          const miseLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) out.push(`mise use nodejs ${miseLatest} || true`);
+          break;
+        case "brew":
+          const brewVersions = nodeVersions.map(v => `node@${v}`);
+          out.push(...addInstallByPackageManager("homebrew", brewVersions));
+          const brewLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) {
+            out.push(`brew unlink node || true`);
+            out.push(`brew link node@${brewLatest} || true`);
+          }
+          break;
+        case "ports":
+          const portsVersions = nodeVersions.map(v => `node${v}`);
+          out.push(...addInstallByPackageManager("macports", portsVersions));
+          const portsLatest = nodeVersions.includes("v25") ? "25" : nodeVersions.includes("v24") ? "24" : "22";
+          if (nodeVersions.length > 0) {
+            out.push(`port select node node${portsLatest} || true`);
+          }
+          break;
       }
-    } else {
-      out.push("# 未选择 Node 版本，如需安装请执行: brew install node");
     }
-  } else if (installMethod === "ports") {
-    if (hasNodeSelection) {
-      for (const v of config.node.nodeVersions) {
-        out.push(...addInstallByPackageManager("macports", [`node${v}`]));
-      }
-    } else {
-      out.push("# 未选择 Node 版本，如需安装请执行: sudo port install node");
-    }
-  } else if (installMethod === "none") {
+  } else {
     out.push('# 跳过 Node.js 安装（如需使用本脚本安装，请先选择安装方式）');
   }
 
