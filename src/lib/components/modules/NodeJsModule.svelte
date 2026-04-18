@@ -86,11 +86,6 @@
       updates.enableCorepack = false;
       updates.installYarn = false;
       updates.installPnpm = false;
-      updates.installDeno = false;
-      updates.installBun = false;
-    } else if (next === "brew" || next === "ports") {
-      updates.nodeVersions = ["v25"];
-    } else {
     }
 
     configStore.patch({
@@ -211,19 +206,6 @@
 
   <div class="mt-5">
     <h3 class="text-sm font-medium text-slate-200">npm 全局安装包管理器</h3>
-    {#if !canInstallPm}
-      <p class="mt-1 text-xs text-amber-300">
-        需选择安装 Node 才能安装包管理器
-        <a
-          href="https://nodejs.org/en/download/current"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="underline hover:text-teal-300"
-        >
-          前往官网下载
-        </a>
-      </p>
-      {/if}
     <div
       class="mt-2 flex flex-wrap gap-3"
       class:opacity-50={!canInstallPm}
@@ -233,7 +215,7 @@
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.enableCorepack}
+          checked={canInstallPm && nodeConfig.enableCorepack}
           disabled={!canInstallPm}
           onchange={(event) =>
             setBoolean("enableCorepack", event.currentTarget.checked)}
@@ -244,7 +226,7 @@
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.installYarn}
+          checked={canInstallPm && nodeConfig.installYarn}
           disabled={!canInstallPm}
           onchange={(event) =>
             setBoolean("installYarn", event.currentTarget.checked)}
@@ -255,7 +237,7 @@
         <input
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
-          checked={nodeConfig.installPnpm}
+          checked={canInstallPm && nodeConfig.installPnpm}
           disabled={!canInstallPm}
           onchange={(event) =>
             setBoolean("installPnpm", event.currentTarget.checked)}
