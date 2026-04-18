@@ -24,6 +24,7 @@ function installByScript(pkg: string): string[] {
     rust: 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y',
     ohMyZsh: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"',
     ohMyPosh: 'curl -s https://ohmyposh.sh/install.sh | bash -s || true',
+    asdf: 'git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0 || true',
 
     corepack: 'npm i -g corepack && corepack enable',
     yarn: 'npm i -g yarn',
@@ -125,6 +126,13 @@ export function generateShellScript(config: Config): string {
           installNodeVersions((v) => `fnm install ${v}`);
           if (latestVersion) out.push(`fnm default ${latestVersion} || true`);
           break;
+        case "asdf":
+          out.push(...installByScript("asdf"));
+          out.push('. "$HOME/.asdf/asdf.sh"');
+          out.push('asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git || true');
+          installNodeVersions((v) => `asdf install nodejs ${v}`);
+          if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
+          break;
         case "nvm":
           out.push(...addInstallByPackageManager(preferredPm, ["nvm"]));
           installNodeVersions((v) => `nvm install ${v}`);
@@ -209,6 +217,12 @@ export function generateShellScript(config: Config): string {
       case "pyenv": 
         out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); 
         break;
+      case "asdf":
+        out.push(...installByScript("asdf"));
+        out.push('. "$HOME/.asdf/asdf.sh"');
+        out.push('asdf plugin add python https://github.com/asdf-community/asdf-python.git || true');
+        if (config.python.installPythonLatest) out.push("asdf install python latest && asdf global python latest");
+        break;
       case "conda": 
         out.push(...addInstallByPackageManager(preferredPm, ["conda"])); 
         break;
@@ -222,7 +236,7 @@ export function generateShellScript(config: Config): string {
         out.push(...addInstallByPackageManager("macports", ["python3"])); 
         break;
     }
-    if (config.python.installPythonLatest) {
+    if (config.python.installPythonLatest && pyMethod !== "asdf") {
       out.push(pyMethod === "uv" ? "uv python install latest" : "# install python latest");
     }
   } else {
@@ -246,24 +260,57 @@ export function generateShellScript(config: Config): string {
 
   if (jdkInstalled) {
     const dist = config.java.jdkDistribution;
-    const jdkPrefix = dist === "temurin" ? "temurin" : dist;
+    
+    // Mapping distribution names to tool-specific identifiers
+    const sdkmanDistMap: Record<string, string> = {
+      temurin: "tem",
+      openjdk: "open",
+      oracle: "oracle"
+    };
+    const miseDistMap: Record<string, string> = {
+      temurin: "temurin",
+      openjdk: "openjdk",
+      oracle: "oracle-graalvm" // Oracle JDK in mise is often graalvm or similar
+    };
 
     switch (jdkMethod) {
       case "sdkman":
         out.push(...installByScript("sdkman"));
+        out.push('export SDKMAN_DIR="$HOME/.sdkman"');
+        out.push('[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"');
+        const sdkDist = sdkmanDistMap[dist] || "open";
         for (const v of config.java.jdkVersions) {
-          out.push(`sdk install java ${jdkPrefix}-${v}.zulu || true`);
+          // SDKMAN identifiers are usually like 17.0.7-tem
+          out.push(`sdk install java ${v}.0.1-${sdkDist} || sdk install java ${v}-${sdkDist} || true`);
         }
         break;
       case "mise":
         out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
+        const miseDist = miseDistMap[dist] || "openjdk";
         for (const v of config.java.jdkVersions) {
-          out.push(`mise install java ${jdkPrefix}-${v} || true`);
+          out.push(`mise install java@${miseDist}-${v} || mise install java@${v} || true`);
         }
         break;
       case "brew":
+        // For Homebrew, we usually need the cask for specific distributions
+        // temurin is a popular one: brew install --cask temurin
         for (const v of config.java.jdkVersions) {
-          out.push(...addInstallByPackageManager("homebrew", [`${jdkPrefix}@${v}`]));
+          if (dist === "temurin") {
+            out.push(`brew install --cask temurin@${v} || brew install --cask temurin || true`);
+          } else if (dist === "openjdk") {
+            out.push(`brew install openjdk@${v} || brew install openjdk || true`);
+          } else {
+            out.push(`brew install --cask oracle-jdk@${v} || true`);
+          }
+        }
+        break;
+      case "asdf":
+        out.push(...installByScript("asdf"));
+        out.push('. "$HOME/.asdf/asdf.sh"');
+        out.push("asdf plugin add java https://github.com/halcyon/asdf-java.git || true");
+        const asdfDist = miseDistMap[dist] || "openjdk";
+        for (const v of config.java.jdkVersions) {
+          out.push(`asdf install java ${asdfDist}-${v} || true`);
         }
         break;
       case "ports":

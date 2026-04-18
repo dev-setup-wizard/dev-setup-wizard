@@ -17,6 +17,7 @@
     { key: "nvm", label: "nvm" },
     { key: "n", label: "n" },
     { key: "mise", label: "mise" },
+    { key: "asdf", label: "asdf" },
     { key: "brew", label: "Homebrew" },
     { key: "ports", label: "MacPorts" },
     { key: "none", label: "不安装 Node" },
