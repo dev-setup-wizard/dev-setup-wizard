@@ -8,8 +8,15 @@ function isDarwinGuard(cmd: string): string {
   return lines('if [[ "$OSTYPE" == "darwin"* ]]; then', `  ${cmd}`, "fi");
 }
 
+function installByScript(pkg: string): string[] {
+  return [`# Please install ${pkg} manually`];
+}
+
 function addInstallByPackageManager(pm: PackageManager, packages: string[]): string[] {
   if (packages.length === 0) return [];
+  if (pm === "none") {
+    return packages.flatMap(pkg => installByScript(pkg));
+  }
   if (pm === "homebrew") return [`brew install ${packages.join(" ")}`];
   if (pm === "macports") return [`sudo port install ${packages.join(" ")}`];
   return [];
@@ -99,7 +106,7 @@ export function generateShellScript(config: Config): string {
           if (latestVersion) out.push(`fnm default ${latestVersion} || true`);
           break;
         case "nvm":
-          out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash');
+          out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash');
           installNodeVersions((v) => `nvm install ${v}`);
           if (latestVersion) out.push(`nvm alias default ${latestVersion} || true`);
           break;
@@ -107,7 +114,7 @@ export function generateShellScript(config: Config): string {
           out.push(
             preferredPm !== "none"
               ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
-              : "npm i -g n || true",
+              : "curl -L https://bit.ly/n-install | bash",
           );
           installNodeVersions((v) => `n ${v}`);
           if (latestVersion) out.push(`n alias default ${latestVersion} || true`);
