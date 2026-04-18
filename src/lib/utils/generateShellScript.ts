@@ -9,6 +9,31 @@ function isDarwinGuard(cmd: string): string {
 }
 
 function installByScript(pkg: string): string[] {
+  const scripts: Record<string, string> = {
+    fnm: 'curl -fsSL https://fnm.vercel.app/install | bash',
+    nvm: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash',
+    n: 'curl -L https://bit.ly/n-install | bash',
+    asdf: 'git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true',
+    mise: 'curl https://mise.run | sh',
+    corepack: 'npm i -g corepack || true',
+    yarn: 'npm i -g yarn || true',
+    pnpm: 'npm i -g pnpm || true',
+    bun: 'curl -fsSL https://bun.sh/install | bash',
+    deno: 'curl -fsSL https://deno.land/install.sh | sh',
+    uv: 'pip install uv || true',
+    pyenv: '# Please install pyenv via Homebrew: brew install pyenv',
+    conda: '# Please install Miniconda via Homebrew: brew install miniconda',
+    sdkman: 'curl -s "https://get.sdkman.io" | bash',
+    go: 'curl -fsSL https://go.dev/dl/go1.21.5.darwin-arm64.pkg | open -W --wait -g',
+    rust: 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y',
+    flutter: '# Please install Flutter from https://docs.flutter.dev/get-started/install',
+    ohMyZsh: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"',
+    ohMyPosh: 'curl -s https://ohmyposh.sh/install.sh | bash -s || true',
+  };
+  
+  if (scripts[pkg]) {
+    return [scripts[pkg]];
+  }
   return [`# Please install ${pkg} manually`];
 }
 
@@ -88,7 +113,7 @@ export function generateShellScript(config: Config): string {
       case "npm-global": return [`npm i -g ${pkg} || true`];
       case "brew": return addInstallByPackageManager("homebrew", [pkg]);
       case "ports": return addInstallByPackageManager("macports", [pkg]);
-      case "script": return [];
+      case "script": return installByScript(pkg);
       default: return [];
     }
   }
@@ -97,40 +122,28 @@ export function generateShellScript(config: Config): string {
     if (hasNodeSelection) {
       switch (installMethod) {
         case "fnm":
-          out.push(
-            preferredPm !== "none"
-              ? lines(...addInstallByPackageManager(preferredPm, ["fnm"]))
-              : 'curl -fsSL https://fnm.vercel.app/install | bash',
-          );
+          out.push(...addInstallByPackageManager(preferredPm, ["fnm"]));
           installNodeVersions((v) => `fnm install ${v}`);
           if (latestVersion) out.push(`fnm default ${latestVersion} || true`);
           break;
         case "nvm":
-          out.push('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash');
+          out.push(...addInstallByPackageManager(preferredPm, ["nvm"]));
           installNodeVersions((v) => `nvm install ${v}`);
           if (latestVersion) out.push(`nvm alias default ${latestVersion} || true`);
           break;
         case "n":
-          out.push(
-            preferredPm !== "none"
-              ? lines(...addInstallByPackageManager(preferredPm, ["n"]))
-              : "curl -L https://bit.ly/n-install | bash",
-          );
+          out.push(...addInstallByPackageManager(preferredPm, ["n"]));
           installNodeVersions((v) => `n ${v}`);
           if (latestVersion) out.push(`n alias default ${latestVersion} || true`);
           break;
         case "asdf":
-          out.push(
-            preferredPm !== "none"
-              ? lines(...addInstallByPackageManager(preferredPm, ["asdf"]))
-              : "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.15.0 || true",
-          );
+          out.push(...addInstallByPackageManager(preferredPm, ["asdf"]));
           out.push('export ASDF_DATA_DIR="$HOME/.asdf"');
           installNodeVersions((v) => `asdf install nodejs ${v}`);
           if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
           break;
         case "mise":
-          out.push('curl https://mise.run | sh');
+          out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
           installNodeVersions((v) => `mise install nodejs ${v}`);
           if (latestVersion) out.push(`mise use nodejs ${latestVersion} || true`);
           break;
@@ -182,23 +195,13 @@ export function generateShellScript(config: Config): string {
   // Bun
   if (config.node.installBun) {
     out.push("# Bun");
-    const bunMethod = config.node.bunInstallMethod;
-    if (bunMethod === "script") {
-      out.push('curl -fsSL https://bun.sh/install | bash');
-    } else {
-      out.push(...installByMethod("bun", bunMethod));
-    }
+    out.push(...installByMethod("bun", config.node.bunInstallMethod));
   }
 
   // Deno
   if (config.node.installDeno) {
     out.push("# Deno");
-    const denoMethod = config.node.denoInstallMethod;
-    if (denoMethod === "script") {
-      out.push('curl -fsSL https://deno.land/install.sh | sh');
-    } else {
-      out.push(...installByMethod("deno", denoMethod));
-    }
+    out.push(...installByMethod("deno", config.node.denoInstallMethod));
   }
 
 
@@ -209,13 +212,27 @@ export function generateShellScript(config: Config): string {
 
   if (pyInstalled) {
     switch (pyMethod) {
-      case "uv": out.push("pip install uv || true"); break;
-      case "pyenv": out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); break;
-      case "conda": out.push(...addInstallByPackageManager(preferredPm, ["miniconda"])); break;
-      case "mise": out.push('curl https://mise.run | sh'); break;
-      case "asdf": out.push(...addInstallByPackageManager(preferredPm, ["asdf"])); break;
-      case "brew": out.push(...addInstallByPackageManager("homebrew", ["python"])); break;
-      case "ports": out.push(...addInstallByPackageManager("macports", ["python3"])); break;
+      case "uv": 
+        out.push(...installByScript("uv")); 
+        break;
+      case "pyenv": 
+        out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); 
+        break;
+      case "conda": 
+        out.push(...addInstallByPackageManager(preferredPm, ["conda"])); 
+        break;
+      case "mise": 
+        out.push(...addInstallByPackageManager(preferredPm, ["mise"])); 
+        break;
+      case "asdf": 
+        out.push(...addInstallByPackageManager(preferredPm, ["asdf"])); 
+        break;
+      case "brew": 
+        out.push(...addInstallByPackageManager("homebrew", ["python"])); 
+        break;
+      case "ports": 
+        out.push(...addInstallByPackageManager("macports", ["python3"])); 
+        break;
     }
     if (config.python.installPythonLatest) {
       out.push(pyMethod === "uv" ? "uv python install latest" : "# install python latest");
@@ -244,13 +261,13 @@ export function generateShellScript(config: Config): string {
 
     switch (jdkMethod) {
       case "sdkman":
-        out.push('curl -s "https://get.sdkman.io" | bash');
+        out.push(...installByScript("sdkman"));
         for (const v of config.java.jdkVersions) {
           out.push(`sdk install java ${jdkPrefix}-${v}.zulu || true`);
         }
         break;
       case "mise":
-        out.push('curl https://mise.run | sh');
+        out.push(...installByScript("mise"));
         for (const v of config.java.jdkVersions) {
           out.push(`mise install java ${jdkPrefix}-${v} || true`);
         }
@@ -291,14 +308,14 @@ export function generateShellScript(config: Config): string {
   // Shell customization
   out.push("# ---- Shell 美化 ----");
   if (config.developerTools.shellCustomization.ohMyZsh) {
-    out.push('sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"');
+    out.push(...installByScript("ohMyZsh"));
     if (config.developerTools.shellCustomization.installRecommendedPlugins) {
       out.push('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true');
       out.push('git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true');
     }
   }
   if (config.developerTools.shellCustomization.ohMyPosh) {
-    out.push('curl -s https://ohmyposh.sh/install.sh | bash -s || true');
+    out.push(...installByScript("ohMyPosh"));
   }
   out.push("");
 
