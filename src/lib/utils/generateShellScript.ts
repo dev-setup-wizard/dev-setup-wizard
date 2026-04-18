@@ -135,7 +135,6 @@ export function generateShellScript(config: Config): string {
       case "mise":
         out.push('curl https://mise.run | sh');
         if (hasNodeSelection) {
-
           if (nodeVersions.includes("v25")) { out.push('mise install nodejs 25'); setDefaultVer = setDefaultVer || "25"; }
           if (nodeVersions.includes("v24")) { out.push('mise install nodejs 24'); setDefaultVer = setDefaultVer || "24"; }
           if (nodeVersions.includes("v22")) { out.push('mise install nodejs 22'); setDefaultVer = setDefaultVer || "22"; }
@@ -147,13 +146,17 @@ export function generateShellScript(config: Config): string {
     }
   } else if (installMethod === "brew") {
     if (hasNodeSelection) {
-      out.push(...addInstallByPackageManager("homebrew", ["node"]));
+      for (const v of config.node.nodeVersions) {
+        out.push(...addInstallByPackageManager("homebrew", [`node@${v}`]));
+      }
     } else {
       out.push("# 未选择 Node 版本，如需安装请执行: brew install node");
     }
   } else if (installMethod === "ports") {
     if (hasNodeSelection) {
-      out.push(...addInstallByPackageManager("macports", ["node"]));
+      for (const v of config.node.nodeVersions) {
+        out.push(...addInstallByPackageManager("macports", [`node${v}`]));
+      }
     } else {
       out.push("# 未选择 Node 版本，如需安装请执行: sudo port install node");
     }

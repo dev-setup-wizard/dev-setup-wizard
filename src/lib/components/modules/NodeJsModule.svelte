@@ -103,15 +103,7 @@
 
   function toggleNodeVersion(version: NodeVersion, checked: boolean): void {
     const current = nodeConfig.nodeVersions;
-    if (isBrewOrPorts) {
-      configStore.patch({
-        node: {
-          ...nodeConfig,
-          nodeVersions: [version],
-        },
-      });
-    } else {
-      const next = checked
+    const next = checked
         ? Array.from(new Set([...current, version]))
         : current.filter((item) => item !== version);
       configStore.patch({
@@ -120,7 +112,6 @@
           nodeVersions: next,
         },
       });
-    }
   }
 
   function setSingleVersion(version: NodeVersion): void {
@@ -197,45 +188,24 @@
 
   <div class="mt-5">
     <h3 class="text-sm font-medium text-slate-200">希望安装的 Node 版本</h3>
-    {#if isBrewOrPorts}
-      <p class="mt-1 text-xs text-slate-400">
-        通过包管理器安装时只能选择一个版本，如需安装多个版本请使用版本管理器（fnm/nvm/n/asdf/mise）。
-      </p>
-    {/if}
     <div
       class="mt-2 flex flex-wrap gap-3"
       class:opacity-50={!canSelectVersions}
       class:pointer-events-none={!canSelectVersions}
     >
-      {#if isBrewOrPorts}
-        {#each nodeVersionOptions as option (option.key)}
-          <label class="flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="radio"
-              name="node-version-single"
-              class="h-4 w-4 accent-teal-500"
-              checked={nodeConfig.nodeVersions.includes(option.key)}
-              disabled={!canSelectVersions}
-              onchange={() => setSingleVersion(option.key)}
-            />
-            {option.label}
-          </label>
-        {/each}
-      {:else}
-        {#each nodeVersionOptions as option (option.key)}
-          <label class="flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-teal-500"
-              checked={nodeConfig.nodeVersions.includes(option.key)}
-              disabled={!canSelectVersions}
-              onchange={(event) =>
-                toggleNodeVersion(option.key, event.currentTarget.checked)}
-            />
-            {option.label}
-          </label>
-        {/each}
-      {/if}
+      {#each nodeVersionOptions as option (option.key)}
+        <label class="flex items-center gap-2 text-sm text-slate-200">
+          <input
+            type="checkbox"
+            class="h-4 w-4 accent-teal-500"
+            checked={nodeConfig.nodeVersions.includes(option.key)}
+            disabled={!canSelectVersions}
+            onchange={(event) =>
+              toggleNodeVersion(option.key, event.currentTarget.checked)}
+          />
+          {option.label}
+        </label>
+      {/each}
     </div>
   </div>
 
