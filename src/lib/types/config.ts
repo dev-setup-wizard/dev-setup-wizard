@@ -17,15 +17,16 @@ export interface PackageManagersConfig {
 export interface NodeConfig {
   nodeInstallMethod: NodeInstallMethod;
   nodeVersions: NodeVersion[];
+
+  enableCorepack: boolean;
   installYarn: boolean;
-  yarnInstallMethod: JsRuntimeInstallMethod;
   installPnpm: boolean;
-  pnpmInstallMethod: JsRuntimeInstallMethod;
-  installDeno: boolean;
-  denoInstallMethod: JsRuntimeInstallMethod;
+
   installBun: boolean;
   bunInstallMethod: JsRuntimeInstallMethod;
-  enableCorepack: boolean;
+  installDeno: boolean;
+  denoInstallMethod: JsRuntimeInstallMethod;
+  
 }
 
 export interface PythonConfig {
@@ -179,15 +180,14 @@ export const defaultConfig: Config = {
   node: {
     nodeInstallMethod: "fnm",
     nodeVersions: [],
-    installYarn: false,
-    yarnInstallMethod: "npm-global",
+    installYarn: true,
     installPnpm: true,
-    pnpmInstallMethod: "npm-global",
-    installDeno: false,
-    denoInstallMethod: "npm-global",
+    enableCorepack: false,
+
     installBun: false,
     bunInstallMethod: "npm-global",
-    enableCorepack: false,
+    installDeno: false,
+    denoInstallMethod: "npm-global",
   },
   python: {
     pythonInstallMethod: "uv",

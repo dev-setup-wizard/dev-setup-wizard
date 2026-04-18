@@ -163,12 +163,12 @@ export function generateShellScript(config: Config): string {
 
   // yarn
   if (config.node.installYarn) {
-    out.push(...installByMethod("yarn", config.node.yarnInstallMethod));
+    out.push(...installByMethod("yarn", "npm-global"));
   }
 
   // pnpm
   if (config.node.installPnpm) {
-    out.push(...installByMethod("pnpm", config.node.pnpmInstallMethod));
+    out.push(...installByMethod("pnpm", "npm-global"));
   }
 
   // Bun
