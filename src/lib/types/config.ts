@@ -42,15 +42,9 @@ export interface JavaConfig {
   jdkVersions: JdkVersion[];
 }
 
-export interface FlutterOptions {
-  channel: "stable" | "beta" | "master";
-}
-
 export interface OtherLanguagesConfig {
   goEnabled: boolean;
   rustEnabled: boolean;
-  flutterEnabled: boolean;
-  flutter: FlutterOptions;
   dartEnabled: boolean;
   otherEnabled: boolean;
   otherName: string;
@@ -203,10 +197,6 @@ export const defaultConfig: Config = {
   otherLanguages: {
     goEnabled: false,
     rustEnabled: false,
-    flutterEnabled: false,
-    flutter: {
-      channel: "stable",
-    },
     dartEnabled: false,
     otherEnabled: false,
     otherName: "",

@@ -2,28 +2,10 @@
   import { fly } from "svelte/transition";
   import { configStore } from "$stores/configStore";
 
-  const flutterChannels = ["stable", "beta", "master"] as const;
-
   const otherLanguages = $derived($configStore.otherLanguages);
 
-  function setBoolean(key: "goEnabled" | "rustEnabled" | "flutterEnabled" | "dartEnabled", value: boolean): void {
+  function setBoolean(key: "goEnabled" | "rustEnabled" | "dartEnabled", value: boolean): void {
     configStore.patch({otherLanguages: {...otherLanguages, [key]: value}});
-  }
-
-  function setFlutterChannel(channel: "stable" | "beta" | "master"): void {
-    configStore.patch({
-      otherLanguages: {...otherLanguages, flutter: {...otherLanguages.flutter, channel}},
-    });
-  }
-
-  function toggleFlutter(e: MouseEvent): void {
-    e.stopPropagation();
-    setBoolean("flutterEnabled", !otherLanguages.flutterEnabled);
-  }
-
-  function selectFlutterChannel(e: MouseEvent, ch: "stable" | "beta" | "master"): void {
-    e.stopPropagation();
-    setFlutterChannel(ch);
   }
 </script>
 
@@ -71,39 +53,6 @@
         <span class={`h-4 w-4 rounded-full border ${otherLanguages.rustEnabled ? "bg-teal-500 border-teal-500" : "border-slate-600"}`}></span>
       </div>
       <p class="mt-2 text-xs text-slate-400">系统编程与后端</p>
-    </button>
-
-    <button
-      type="button"
-      class={`rounded-xl border p-4 text-left transition ${
-        otherLanguages.flutterEnabled
-          ? "border-teal-500 bg-teal-500/10"
-          : "border-slate-700 bg-slate-950/30 hover:border-teal-500/50"
-      }`}
-onclick={() => setBoolean("flutterEnabled", !otherLanguages.flutterEnabled)}
-    >
-      <div class="flex items-center justify-between">
-        <h3 class="text-sm font-medium text-slate-100">Flutter</h3>
-        <span class={`h-4 w-4 rounded-full border ${otherLanguages.flutterEnabled ? "bg-teal-500 border-teal-500" : "border-slate-600"}`}></span>
-      </div>
-      <p class="mt-2 text-xs text-slate-400">跨平台 UI 开发</p>
-      {#if otherLanguages.flutterEnabled}
-        <div class="mt-3 flex gap-1">
-          {#each flutterChannels as ch}
-            <div
-              role="button"
-              class={`cursor-pointer rounded px-2 py-0.5 text-xs ${
-                otherLanguages.flutter.channel === ch
-                  ? "bg-teal-500 text-slate-900"
-                  : "bg-slate-800 text-slate-300"
-              }`}
-              onclick={() => setFlutterChannel(ch)}
-            >
-              {ch}
-            </div>
-          {/each}
-        </div>
-      {/if}
     </button>
 
     <button

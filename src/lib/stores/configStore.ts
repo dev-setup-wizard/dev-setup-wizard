@@ -84,10 +84,6 @@ function createConfigStore() {
           otherLanguages: {
             ...current.otherLanguages,
             ...patch.otherLanguages,
-            flutter: {
-              ...current.otherLanguages.flutter,
-              ...patch.otherLanguages?.flutter,
-            },
           },
           developerTools: {
             ...current.developerTools,
@@ -164,7 +160,6 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
       return (
         config.otherLanguages.goEnabled ||
         config.otherLanguages.rustEnabled ||
-        config.otherLanguages.flutterEnabled ||
         config.otherLanguages.dartEnabled ||
         (config.otherLanguages.otherEnabled && config.otherLanguages.otherName.trim().length > 0)
       );

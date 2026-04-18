@@ -22,7 +22,6 @@ function installByScript(pkg: string): string[] {
     sdkman: 'curl -s "https://get.sdkman.io" | bash',
     go: 'curl -fsSL https://go.dev/dl/go1.21.5.darwin-arm64.pkg | open -W --wait -g',
     rust: 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y',
-    flutter: '# Please install Flutter from https://docs.flutter.dev/get-started/install',
     ohMyZsh: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"',
     ohMyPosh: 'curl -s https://ohmyposh.sh/install.sh | bash -s || true',
 
@@ -282,7 +281,6 @@ export function generateShellScript(config: Config): string {
   out.push("# ---- Other Languages ----");
   if (config.otherLanguages.goEnabled) out.push(...addInstallByPackageManager(preferredPm, ["go"]));
   if (config.otherLanguages.rustEnabled) out.push("curl https://sh.rustup.rs -sSf | sh -s -- -y");
-  if (config.otherLanguages.flutterEnabled) out.push(...addInstallByPackageManager(preferredPm, ["flutter"]));
   if (config.otherLanguages.dartEnabled) out.push(...addInstallByPackageManager(preferredPm, ["dart"]));
   if (config.otherLanguages.otherEnabled && config.otherLanguages.otherName.trim()) {
     out.push(`# custom language: ${config.otherLanguages.otherName.trim()}`);
