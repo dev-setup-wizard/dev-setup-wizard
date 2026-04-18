@@ -143,20 +143,34 @@ export function generateShellScript(config: Config): string {
           }
           break;
       }
+      if (nodeVersions.length > 0) {
+        // corepack
+        if (config.node.enableCorepack) {
+          if (parseInt(latestVersion) >=25) {
+            out.push(`# 从 Node.js v25 开始，默认安装不包含 corepack`);
+            out.push(...installByMethod("corepack", "npm-global"));
+          } else {
+            out.push(`# Node.js v${latestVersion} 自带 corepack`); 
+          }
+          out.push("corepack enable || true");
+        }
+
+        // yarn
+        if (config.node.installYarn) {
+          out.push(...installByMethod("yarn", "npm-global"));
+        }
+
+        // pnpm
+        if (config.node.installPnpm) {
+          out.push(...installByMethod("pnpm", "npm-global"));
+        }
+        out.push("");
+      }
     }
   } else {
     out.push('# 跳过 Node.js 安装（如需使用本脚本安装，请先选择安装方式）');
   }
 
-  // yarn
-  if (config.node.installYarn) {
-    out.push(...installByMethod("yarn", "npm-global"));
-  }
-
-  // pnpm
-  if (config.node.installPnpm) {
-    out.push(...installByMethod("pnpm", "npm-global"));
-  }
 
   // Bun
   if (config.node.installBun) {
@@ -180,11 +194,6 @@ export function generateShellScript(config: Config): string {
     }
   }
 
-  // corepack
-  if (config.node.enableCorepack) {
-    out.push("corepack enable || true");
-  }
-  out.push("");
 
   // Python
   out.push("# ---- Python ----");
