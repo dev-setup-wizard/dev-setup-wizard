@@ -213,7 +213,7 @@ export function generateShellScript(config: Config): string {
   if (pyInstalled) {
     switch (pyMethod) {
       case "uv": 
-        out.push(...installByScript("uv")); 
+        out.push(...addInstallByPackageManager(preferredPm, ["uv"])); 
         break;
       case "pyenv": 
         out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); 
@@ -243,6 +243,7 @@ export function generateShellScript(config: Config): string {
 
   if (config.python.aliasPythonToPython3) {
     out.push('echo \'alias python="python3"\' >> ~/.zshrc');
+    out.push('echo \'alias pip="pip3"\' >> ~/.zshrc');
   }
 
   if (config.python.installPython2) {
@@ -267,7 +268,7 @@ export function generateShellScript(config: Config): string {
         }
         break;
       case "mise":
-        out.push(...installByScript("mise"));
+        out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
         for (const v of config.java.jdkVersions) {
           out.push(`mise install java ${jdkPrefix}-${v} || true`);
         }
