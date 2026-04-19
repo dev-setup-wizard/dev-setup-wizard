@@ -95,7 +95,7 @@ export interface ContainersConfig {
 
 export interface GuiAppsConfig {
   vscode: boolean;
-  androidStudio: boolean;
+  "android-studio": boolean;
   intellijIdea: boolean;
   webstorm: boolean;
   pycharm: boolean;
@@ -248,7 +248,7 @@ export const defaultConfig: Config = {
     },
     guiApps: {
       vscode: true,
-      androidStudio: false,
+      "android-studio": false,
       intellijIdea: false,
       webstorm: false,
       pycharm: false,

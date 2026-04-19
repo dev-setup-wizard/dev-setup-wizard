@@ -48,10 +48,12 @@
           <summary class="cursor-pointer text-sm font-medium text-slate-100">{section.title}</summary>
           <div class="mt-3 grid gap-2 md:grid-cols-3">
             {#each section.tools as tool (tool.id)}
-              {@const isDisabled = tool.isMacOnly && !isMac}
+              {@const isOsDisabled = tool.isMacOnly && !isMac}
+              {@const isPmDisabled = packageManager === "macports" && tool.notInPorts}
+              {@const isDisabled = isOsDisabled || isPmDisabled}
               <label 
                 class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${isDisabled ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500" : "border-slate-700 bg-slate-900/40 text-slate-200"}`}
-                title={isDisabled ? "仅 macOS 可用" : ""}
+                title={isOsDisabled ? "仅 macOS 可用" : isPmDisabled ? "MacPorts 不支持此工具" : ""}
               >
                 <span>{tool.name}{tool.isMacOnly ? "（仅 Mac）" : ""}</span>
                 <input 

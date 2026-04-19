@@ -2,13 +2,15 @@ export interface ToolDefinition {
   id: string;
   name: string;
   isMacOnly?: boolean;
+  isCask?: boolean;
+  notInPorts?: boolean;
 }
 
 export const CLI_TOOLS: ToolDefinition[] = [
   { id: "git", name: "git" },
   { id: "openssh", name: "openssh" },
   { id: "php", name: "php" },
-  { id: "cocoapods", name: "cocoapods" },
+  { id: "cocoapods", name: "cocoapods", isMacOnly: true },
   { id: "tmux", name: "tmux" },
   { id: "jq", name: "jq" },
   { id: "wget", name: "wget" },
@@ -26,47 +28,47 @@ export const DATABASE_TOOLS: ToolDefinition[] = [
   { id: "mysql", name: "mysql" },
   { id: "mariadb", name: "mariadb" },
   { id: "postgresql", name: "postgresql" },
-  { id: "mongodb", name: "mongodb" },
+  { id: "mongodb", name: "mongodb", notInPorts: true },
 ];
 
 export const CONTAINER_TOOLS: ToolDefinition[] = [
-  { id: "docker", name: "docker" },
-  { id: "containerd", name: "containerd" },
+  { id: "docker", name: "docker", isCask: true },
+  { id: "containerd", name: "containerd", notInPorts: true },
   { id: "podman", name: "podman" },
   { id: "kubernetes", name: "kubernetes" },
-  { id: "appleVirtualization", name: "Apple Virtualization", isMacOnly: true },
-  { id: "lxc", name: "lxc" },
-  { id: "lxd", name: "lxd" },
+  { id: "appleVirtualization", name: "Apple Virtualization", isMacOnly: true, notInPorts: true },
+  { id: "lxc", name: "lxc", notInPorts: true },
+  { id: "lxd", name: "lxd", notInPorts: true },
 ];
 
 export const GUI_TOOLS: ToolDefinition[] = [
-  { id: "vscode", name: "vscode" },
-  { id: "androidStudio", name: "androidStudio" },
-  { id: "intellijIdea", name: "intellijIdea" },
-  { id: "webstorm", name: "webstorm" },
-  { id: "pycharm", name: "pycharm" },
-  { id: "sublimeText", name: "sublimeText" },
-  { id: "iterm2", name: "iterm2" },
-  { id: "googleChrome", name: "googleChrome" },
-  { id: "microsoftEdge", name: "microsoftEdge" },
-  { id: "firefox", name: "firefox" },
-  { id: "githubDesktop", name: "githubDesktop" },
-  { id: "anotherRedisDesktopManager", name: "anotherRedisDesktopManager" },
+  { id: "vscode", name: "VS Code", isCask: true, notInPorts: true },
+  { id: "android-studio", name: "Android Studio", isCask: true, notInPorts: true },
+  { id: "intellijIdea", name: "IntelliJ IDEA", isCask: true, notInPorts: true },
+  { id: "webstorm", name: "WebStorm", isCask: true, notInPorts: true },
+  { id: "pycharm", name: "PyCharm", isCask: true, notInPorts: true },
+  { id: "sublimeText", name: "Sublime Text", isCask: true, notInPorts: true },
+  { id: "iterm2", name: "iTerm2", isCask: true, isMacOnly: true, notInPorts: true },
+  { id: "googleChrome", name: "Google Chrome", isCask: true, notInPorts: true },
+  { id: "microsoftEdge", name: "Microsoft Edge", isCask: true, notInPorts: true },
+  { id: "firefox", name: "Firefox", isCask: true, notInPorts: true },
+  { id: "githubDesktop", name: "GitHub Desktop", isCask: true, notInPorts: true },
+  { id: "anotherRedisDesktopManager", name: "Another Redis Desktop Manager", isCask: true, notInPorts: true },
 ];
 
 export const AI_TOOLS: ToolDefinition[] = [
-  { id: "ollama", name: "ollama" },
-  { id: "continueDevCli", name: "continueDevCli" },
-  { id: "openWebui", name: "openWebui" },
+  { id: "ollama", name: "Ollama", isCask: true, notInPorts: true },
+  { id: "continueDevCli", name: "Continue (CLI)", notInPorts: true },
+  { id: "openWebui", name: "Open WebUI", notInPorts: true },
 ];
 
 export const NETWORK_TOOLS: ToolDefinition[] = [
-  { id: "postman", name: "postman" },
-  { id: "bruno", name: "bruno" },
-  { id: "httpie", name: "httpie" },
-  { id: "proxyman", name: "Proxyman", isMacOnly: true },
-  { id: "tailscale", name: "tailscale" },
-  { id: "zerotier", name: "zerotier" },
+  { id: "postman", name: "Postman", isCask: true, notInPorts: true },
+  { id: "bruno", name: "Bruno", isCask: true, notInPorts: true },
+  { id: "httpie", name: "HTTPie", isCask: true },
+  { id: "proxyman", name: "Proxyman", isCask: true, isMacOnly: true, notInPorts: true },
+  { id: "tailscale", name: "Tailscale", isCask: true, notInPorts: true },
+  { id: "zerotier", name: "ZeroTier", isCask: true, notInPorts: true },
 ];
 
 export const DEV_TOOLS_SECTIONS = [
