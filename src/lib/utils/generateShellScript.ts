@@ -281,27 +281,14 @@ export function generateShellScript(config: Config): string {
         const sdkDist = sdkmanDistMap[dist] || "open";
         for (const v of config.java.jdkVersions) {
           // SDKMAN identifiers are usually like 17.0.7-tem
-          out.push(`sdk install java ${v}.0.1-${sdkDist} || sdk install java ${v}-${sdkDist} || true`);
+          out.push(`sdk install java ${v}-${sdkDist} || true`);
         }
         break;
       case "mise":
         out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
         const miseDist = miseDistMap[dist] || "openjdk";
         for (const v of config.java.jdkVersions) {
-          out.push(`mise install java@${miseDist}-${v} || mise install java@${v} || true`);
-        }
-        break;
-      case "brew":
-        // For Homebrew, we usually need the cask for specific distributions
-        // temurin is a popular one: brew install --cask temurin
-        for (const v of config.java.jdkVersions) {
-          if (dist === "temurin") {
-            out.push(`brew install --cask temurin@${v} || brew install --cask temurin || true`);
-          } else if (dist === "openjdk") {
-            out.push(`brew install openjdk@${v} || brew install openjdk || true`);
-          } else {
-            out.push(`brew install --cask oracle-jdk@${v} || true`);
-          }
+          out.push(`mise install java@${miseDist}-${v} || true`);
         }
         break;
       case "asdf":
@@ -311,6 +298,19 @@ export function generateShellScript(config: Config): string {
         const asdfDist = miseDistMap[dist] || "openjdk";
         for (const v of config.java.jdkVersions) {
           out.push(`asdf install java ${asdfDist}-${v} || true`);
+        }
+        break;
+      case "brew":
+        // For Homebrew, we usually need the cask for specific distributions
+        // temurin is a popular one: brew install --cask temurin
+        for (const v of config.java.jdkVersions) {
+          if (dist === "temurin") {
+            out.push(`brew install --cask temurin@${v} || true`);
+          } else if (dist === "openjdk") {
+            out.push(`brew install openjdk@${v} || true`);
+          } else {
+            out.push(`brew install --cask oracle-jdk@${v} || true`);
+          }
         }
         break;
       case "ports":

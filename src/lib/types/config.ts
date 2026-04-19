@@ -8,7 +8,7 @@ export type PythonInstallMethod = "uv" | "pyenv" | "conda" | "mise" | "asdf" | "
 export type PythonToolInstallMethod = "pip" | "brew" | "ports" | "script";
 export type JdkInstallMethod = "sdkman" | "brew" | "ports" | "mise" | "asdf" | "none";
 export type JdkDistribution = "openjdk" | "oracle" | "temurin";
-export type JdkVersion = "25" | "21" | "17" | "11";
+export type JdkVersion = "25" | "24" | "21" | "17" | "11";
 
 export interface PackageManagersConfig {
   packageManagers: PackageManager[];

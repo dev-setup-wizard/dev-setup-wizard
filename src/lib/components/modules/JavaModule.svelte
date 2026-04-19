@@ -19,6 +19,7 @@
 
   const versionOptions: { key: JdkVersion; label: string }[] = [
     { key: "25", label: "JDK 25" },
+    { key: "24", label: "JDK 24" },
     { key: "21", label: "JDK 21 (LTS)" },
     { key: "17", label: "JDK 17 (LTS)" },
     { key: "11", label: "JDK 11 (LTS)" },
