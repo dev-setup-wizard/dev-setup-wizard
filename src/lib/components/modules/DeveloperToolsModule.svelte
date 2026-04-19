@@ -10,11 +10,15 @@
   const packageManager = $derived($configStore.packageManagers.packageManagers[0] ?? "none");
   const canInstallTools = $derived(packageManager !== "none");
 
-  function patchSection<T extends keyof DeveloperToolsConfig>(section: T, key: string, value: boolean): void {
+  function patchSection<T extends keyof DeveloperToolsConfig>(
+    section: T,
+    key: string,
+    value: boolean,
+  ): void {
     configStore.patch({
       developerTools: {
         ...devTools,
-        [section]: {...devTools[section], [key]: value},
+        [section]: { ...devTools[section], [key]: value },
       },
     });
   }
@@ -26,7 +30,7 @@
   in:fly={{ y: 18, duration: 350 }}
 >
   {#if packageManager === "none"}
-    <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 mb-4">
+    <div class="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
       <p class="text-sm text-amber-300">
         选择包管理器后才能安装其他开发者工具。请在第一个模块中选择 Homebrew 或 MacPorts。
       </p>
@@ -44,24 +48,30 @@
 
     <div class="mt-5 space-y-3">
       {#each DEV_TOOLS_SECTIONS as section}
-        <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4" open={section.key === 'cliTools'}>
-          <summary class="cursor-pointer text-sm font-medium text-slate-100">{section.title}</summary>
+        <details
+          class="rounded-xl border border-slate-700 bg-slate-950/30 p-4"
+          open={section.key === "cliTools"}
+        >
+          <summary class="cursor-pointer text-sm font-medium text-slate-100"
+            >{section.title}</summary
+          >
           <div class="mt-3 grid gap-2 md:grid-cols-3">
             {#each section.tools as tool (tool.id)}
               {@const isOsDisabled = tool.isMacOnly && !isMac}
               {@const isPmDisabled = packageManager === "macports" && tool.notInPorts}
               {@const isDisabled = isOsDisabled || isPmDisabled}
-              <label 
+              <label
                 class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${isDisabled ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500" : "border-slate-700 bg-slate-900/40 text-slate-200"}`}
                 title={isOsDisabled ? "仅 macOS 可用" : isPmDisabled ? "MacPorts 不支持此工具" : ""}
               >
                 <span>{tool.name}{tool.isMacOnly ? "（仅 Mac）" : ""}</span>
-                <input 
-                  type="checkbox" 
-                  class="h-4 w-4 accent-teal-500" 
-                  checked={(devTools[section.key] as any)[tool.id]} 
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 accent-teal-500"
+                  checked={(devTools[section.key] as any)[tool.id]}
                   disabled={isDisabled}
-                  onchange={(e) => patchSection(section.key as any, tool.id, e.currentTarget.checked)} 
+                  onchange={(e) =>
+                    patchSection(section.key as any, tool.id, e.currentTarget.checked)}
                 />
               </label>
             {/each}

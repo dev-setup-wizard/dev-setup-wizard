@@ -46,7 +46,9 @@
         <h3 class="text-sm font-medium text-slate-100">Oh My Zsh</h3>
         <p class="mt-1 text-xs text-slate-400">终端美化框架</p>
       </div>
-      <span class={`h-4 w-4 rounded-full border-2 ${shellConfig.ohMyZsh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}></span>
+      <span
+        class={`h-4 w-4 rounded-full border-2 ${shellConfig.ohMyZsh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}
+      ></span>
     </button>
 
     <button
@@ -62,7 +64,9 @@
         <h3 class="text-sm font-medium text-slate-100">Oh My Posh</h3>
         <p class="mt-1 text-xs text-slate-400">终端提示符美化</p>
       </div>
-      <span class={`h-4 w-4 rounded-full border-2 ${shellConfig.ohMyPosh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}></span>
+      <span
+        class={`h-4 w-4 rounded-full border-2 ${shellConfig.ohMyPosh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}
+      ></span>
     </button>
 
     <button
@@ -78,7 +82,9 @@
         <h3 class="text-sm font-medium text-slate-100">不安装</h3>
         <p class="mt-1 text-xs text-slate-400">跳过 shell 美化</p>
       </div>
-      <span class={`h-4 w-4 rounded-full border-2 ${!shellConfig.ohMyZsh && !shellConfig.ohMyPosh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}></span>
+      <span
+        class={`h-4 w-4 rounded-full border-2 ${!shellConfig.ohMyZsh && !shellConfig.ohMyPosh ? "border-teal-500 bg-teal-500" : "border-slate-600"}`}
+      ></span>
     </button>
   </div>
 </section>

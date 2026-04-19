@@ -11,27 +11,28 @@ function isDarwinGuard(cmd: string): string {
 
 function installByScript(pkg: string): string[] {
   const scripts: Record<string, string> = {
-    fnm: 'curl -fsSL https://fnm.vercel.app/install | bash',
-    nvm: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash',
-    n: 'curl -L https://bit.ly/n-install | bash',
-    mise: 'curl https://mise.run | sh',
-    bun: 'curl -fsSL https://bun.sh/install | bash',
-    deno: 'curl -fsSL https://deno.land/install.sh | sh',
-    uv: 'curl -LsSf https://astral.sh/uv/install.sh | sh',
-    pyenv: 'curl -fsSL https://pyenv.run | bash',
-    conda: 'curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh | bash',
+    fnm: "curl -fsSL https://fnm.vercel.app/install | bash",
+    nvm: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash",
+    n: "curl -L https://bit.ly/n-install | bash",
+    mise: "curl https://mise.run | sh",
+    bun: "curl -fsSL https://bun.sh/install | bash",
+    deno: "curl -fsSL https://deno.land/install.sh | sh",
+    uv: "curl -LsSf https://astral.sh/uv/install.sh | sh",
+    pyenv: "curl -fsSL https://pyenv.run | bash",
+    conda: "curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh | bash",
     sdkman: 'curl -s "https://get.sdkman.io" | bash',
-    go: 'curl -fsSL https://go.dev/dl/go1.21.5.darwin-arm64.pkg | open -W --wait -g',
+    go: "curl -fsSL https://go.dev/dl/go1.21.5.darwin-arm64.pkg | open -W --wait -g",
     rust: 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y',
-    ohMyZsh: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"',
-    ohMyPosh: 'curl -s https://ohmyposh.sh/install.sh | bash -s || true',
-    asdf: 'git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0 || true',
+    ohMyZsh:
+      'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"',
+    ohMyPosh: "curl -s https://ohmyposh.sh/install.sh | bash -s || true",
+    asdf: "git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0 || true",
 
-    corepack: 'npm i -g corepack && corepack enable',
-    yarn: 'npm i -g yarn',
-    pnpm: 'npm i -g pnpm',
+    corepack: "npm i -g corepack && corepack enable",
+    yarn: "npm i -g yarn",
+    pnpm: "npm i -g pnpm",
   };
-  
+
   if (scripts[pkg]) {
     return [scripts[pkg]];
   }
@@ -41,7 +42,7 @@ function installByScript(pkg: string): string[] {
 function addInstallByPackageManager(pm: PackageManager, packages: string[]): string[] {
   if (packages.length === 0) return [];
   if (pm === "none") {
-    return packages.flatMap(pkg => installByScript(pkg));
+    return packages.flatMap((pkg) => installByScript(pkg));
   }
   if (pm === "homebrew") return [`brew install ${packages.join(" ")}`];
   if (pm === "macports") return [`sudo port install ${packages.join(" ")}`];
@@ -73,15 +74,19 @@ export function generateShellScript(config: Config): string {
   out.push("");
 
   if (config.packageManagers.packageManagers.includes("homebrew")) {
-    out.push('if ! command -v brew >/dev/null 2>&1; then');
+    out.push("if ! command -v brew >/dev/null 2>&1; then");
     out.push('  echo "📦 安装 Homebrew..."');
-    out.push('  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"');
+    out.push(
+      '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
+    );
     out.push("fi");
     out.push("");
   }
 
   if (config.packageManagers.packageManagers.includes("macports")) {
-    out.push(isDarwinGuard('if ! command -v port >/dev/null 2>&1; then echo "请先手动安装 MacPorts"; fi'));
+    out.push(
+      isDarwinGuard('if ! command -v port >/dev/null 2>&1; then echo "请先手动安装 MacPorts"; fi'),
+    );
     out.push("");
   }
 
@@ -93,7 +98,7 @@ export function generateShellScript(config: Config): string {
 
   function getLatestVersion(versions: string[]): string {
     if (versions.length === 0) return "";
-    const nums = versions.map(v => parseInt(v.replace("v", ""), 10));
+    const nums = versions.map((v) => parseInt(v.replace("v", ""), 10));
     return String(Math.max(...nums));
   }
 
@@ -111,11 +116,16 @@ export function generateShellScript(config: Config): string {
 
   function installByMethod(pkg: string, method: string): string[] {
     switch (method) {
-      case "npm-global": return [`npm i -g ${pkg} || true`];
-      case "brew": return addInstallByPackageManager("homebrew", [pkg]);
-      case "ports": return addInstallByPackageManager("macports", [pkg]);
-      case "script": return installByScript(pkg);
-      default: return [];
+      case "npm-global":
+        return [`npm i -g ${pkg} || true`];
+      case "brew":
+        return addInstallByPackageManager("homebrew", [pkg]);
+      case "ports":
+        return addInstallByPackageManager("macports", [pkg]);
+      case "script":
+        return installByScript(pkg);
+      default:
+        return [];
     }
   }
 
@@ -130,7 +140,7 @@ export function generateShellScript(config: Config): string {
         case "asdf":
           out.push(...installByScript("asdf"));
           out.push('. "$HOME/.asdf/asdf.sh"');
-          out.push('asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git || true');
+          out.push("asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git || true");
           installNodeVersions((v) => `asdf install nodejs ${v}`);
           if (latestVersion) out.push(`asdf global nodejs ${latestVersion} || true`);
           break;
@@ -150,7 +160,7 @@ export function generateShellScript(config: Config): string {
           if (latestVersion) out.push(`mise use -g node@${latestVersion} || true`);
           break;
         case "brew":
-          const brewVersions = nodeVersions.map(v => `node@${v}`);
+          const brewVersions = nodeVersions.map((v) => `node@${v}`);
           out.push(...addInstallByPackageManager("homebrew", brewVersions));
           if (latestVersion) {
             out.push(`brew unlink node || true`);
@@ -158,7 +168,7 @@ export function generateShellScript(config: Config): string {
           }
           break;
         case "ports":
-          const portsVersions = nodeVersions.map(v => `node${v}`);
+          const portsVersions = nodeVersions.map((v) => `node${v}`);
           out.push(...addInstallByPackageManager("macports", portsVersions));
           if (latestVersion) {
             out.push(`port select node node${latestVersion} || true`);
@@ -168,11 +178,11 @@ export function generateShellScript(config: Config): string {
       if (nodeVersions.length > 0) {
         // corepack
         if (config.node.enableCorepack) {
-          if (parseInt(latestVersion) >=25) {
+          if (parseInt(latestVersion) >= 25) {
             out.push(`# 从 Node.js v25 开始，默认安装不包含 corepack`);
             out.push(...installByMethod("corepack", "npm-global"));
           } else {
-            out.push(`# Node.js v${latestVersion} 自带 corepack`); 
+            out.push(`# Node.js v${latestVersion} 自带 corepack`);
           }
         }
 
@@ -188,9 +198,8 @@ export function generateShellScript(config: Config): string {
       }
     }
   } else {
-    out.push('# 跳过 Node.js 安装（如需使用本脚本安装，请先选择安装方式）');
+    out.push("# 跳过 Node.js 安装（如需使用本脚本安装，请先选择安装方式）");
   }
-
 
   // Bun
   if (config.node.installBun) {
@@ -212,29 +221,32 @@ export function generateShellScript(config: Config): string {
 
   if (pyInstalled) {
     switch (pyMethod) {
-      case "uv": 
-        out.push(...addInstallByPackageManager(preferredPm, ["uv"])); 
+      case "uv":
+        out.push(...addInstallByPackageManager(preferredPm, ["uv"]));
         break;
-      case "pyenv": 
-        out.push(...addInstallByPackageManager(preferredPm, ["pyenv"])); 
+      case "pyenv":
+        out.push(...addInstallByPackageManager(preferredPm, ["pyenv"]));
         break;
       case "asdf":
         out.push(...installByScript("asdf"));
         out.push('. "$HOME/.asdf/asdf.sh"');
-        out.push('asdf plugin add python https://github.com/asdf-community/asdf-python.git || true');
-        if (config.python.installPythonLatest) out.push("asdf install python latest && asdf global python latest");
+        out.push(
+          "asdf plugin add python https://github.com/asdf-community/asdf-python.git || true",
+        );
+        if (config.python.installPythonLatest)
+          out.push("asdf install python latest && asdf global python latest");
         break;
-      case "conda": 
-        out.push(...addInstallByPackageManager(preferredPm, ["conda"])); 
+      case "conda":
+        out.push(...addInstallByPackageManager(preferredPm, ["conda"]));
         break;
-      case "mise": 
-        out.push(...addInstallByPackageManager(preferredPm, ["mise"])); 
+      case "mise":
+        out.push(...addInstallByPackageManager(preferredPm, ["mise"]));
         break;
-      case "brew": 
-        out.push(...addInstallByPackageManager("homebrew", ["python"])); 
+      case "brew":
+        out.push(...addInstallByPackageManager("homebrew", ["python"]));
         break;
-      case "ports": 
-        out.push(...addInstallByPackageManager("macports", ["python3"])); 
+      case "ports":
+        out.push(...addInstallByPackageManager("macports", ["python3"]));
         break;
     }
     if (config.python.installPythonLatest && pyMethod !== "asdf") {
@@ -245,8 +257,8 @@ export function generateShellScript(config: Config): string {
   }
 
   if (config.python.aliasPythonToPython3) {
-    out.push('echo \'alias python="python3"\' >> ~/.zshrc');
-    out.push('echo \'alias pip="pip3"\' >> ~/.zshrc');
+    out.push("echo 'alias python=\"python3\"' >> ~/.zshrc");
+    out.push("echo 'alias pip=\"pip3\"' >> ~/.zshrc");
   }
 
   if (config.python.installPython2) {
@@ -261,24 +273,26 @@ export function generateShellScript(config: Config): string {
 
   if (jdkInstalled) {
     const dist = config.java.jdkDistribution;
-    
+
     // Mapping distribution names to tool-specific identifiers
     const sdkmanDistMap: Record<string, string> = {
       temurin: "tem",
       openjdk: "open",
-      oracle: "oracle"
+      oracle: "oracle",
     };
     const miseDistMap: Record<string, string> = {
       temurin: "temurin",
       openjdk: "openjdk",
-      oracle: "oracle-graalvm" // Oracle JDK in mise is often graalvm or similar
+      oracle: "oracle-graalvm", // Oracle JDK in mise is often graalvm or similar
     };
 
     switch (jdkMethod) {
       case "sdkman":
         out.push(...installByScript("sdkman"));
         out.push('export SDKMAN_DIR="$HOME/.sdkman"');
-        out.push('[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"');
+        out.push(
+          '[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"',
+        );
         const sdkDist = sdkmanDistMap[dist] || "open";
         for (const v of config.java.jdkVersions) {
           // SDKMAN identifiers are usually like 17.0.7-tem
@@ -328,12 +342,26 @@ export function generateShellScript(config: Config): string {
   // Other languages
   out.push("# ---- Other Languages ----");
   if (config.otherLanguages.go.enabled) {
-    const goMethod = config.otherLanguages.go.installMethod === "mise" ? "none" : config.otherLanguages.go.installMethod === "brew" ? "homebrew" : config.otherLanguages.go.installMethod === "ports" ? "macports" : "none";
+    const goMethod =
+      config.otherLanguages.go.installMethod === "mise"
+        ? "none"
+        : config.otherLanguages.go.installMethod === "brew"
+          ? "homebrew"
+          : config.otherLanguages.go.installMethod === "ports"
+            ? "macports"
+            : "none";
     out.push(...addInstallByPackageManager(goMethod, ["go"]));
   }
   if (config.otherLanguages.rust.enabled) out.push(...installByScript("rust"));
   if (config.otherLanguages.dart.enabled) {
-    const dartMethod = config.otherLanguages.dart.installMethod === "mise" ? "none" : config.otherLanguages.dart.installMethod === "brew" ? "homebrew" : config.otherLanguages.dart.installMethod === "ports" ? "macports" : "none";
+    const dartMethod =
+      config.otherLanguages.dart.installMethod === "mise"
+        ? "none"
+        : config.otherLanguages.dart.installMethod === "brew"
+          ? "homebrew"
+          : config.otherLanguages.dart.installMethod === "ports"
+            ? "macports"
+            : "none";
     out.push(...addInstallByPackageManager(dartMethod, ["dart"]));
   }
   if (config.otherLanguages.otherEnabled && config.otherLanguages.otherName.trim()) {
@@ -346,8 +374,12 @@ export function generateShellScript(config: Config): string {
   if (config.developerTools.shellCustomization.ohMyZsh) {
     out.push(...installByScript("ohMyZsh"));
     if (config.developerTools.shellCustomization.installRecommendedPlugins) {
-      out.push('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true');
-      out.push('git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true');
+      out.push(
+        "git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting || true",
+      );
+      out.push(
+        "git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions || true",
+      );
     }
   }
   if (config.developerTools.shellCustomization.ohMyPosh) {
@@ -357,19 +389,22 @@ export function generateShellScript(config: Config): string {
 
   // Developer tools
   const pm = hasPackageManager(config) ? preferredPm : "none";
-  if (pm !== "none" || true) { // Even if no PM selected, we might want to see the section
+  if (pm !== "none" || true) {
+    // Even if no PM selected, we might want to see the section
     out.push("# ---- Developer Tools ----");
 
     for (const section of DEV_TOOLS_SECTIONS) {
-      const selectedTools = section.tools.filter(t => (config.developerTools[section.key] as any)[t.id]);
-      
+      const selectedTools = section.tools.filter(
+        (t) => (config.developerTools[section.key] as any)[t.id],
+      );
+
       if (selectedTools.length > 0) {
         out.push(`# ${section.title}`);
-        
+
         if (preferredPm === "homebrew") {
-          const formulaes = selectedTools.filter(t => !t.isCask).map(t => t.id);
-          const casks = selectedTools.filter(t => t.isCask).map(t => t.id);
-          
+          const formulaes = selectedTools.filter((t) => !t.isCask).map((t) => t.id);
+          const casks = selectedTools.filter((t) => t.isCask).map((t) => t.id);
+
           if (formulaes.length > 0) {
             out.push(`brew install ${formulaes.join(" ")}`);
           }
@@ -377,9 +412,9 @@ export function generateShellScript(config: Config): string {
             out.push(`brew install --cask ${casks.join(" ")}`);
           }
         } else if (preferredPm === "macports") {
-          const supported = selectedTools.filter(t => !t.notInPorts).map(t => t.id);
-          const unsupported = selectedTools.filter(t => t.notInPorts).map(t => t.id);
-          
+          const supported = selectedTools.filter((t) => !t.notInPorts).map((t) => t.id);
+          const unsupported = selectedTools.filter((t) => t.notInPorts).map((t) => t.id);
+
           if (supported.length > 0) {
             out.push(`sudo port install ${supported.join(" ")}`);
           }
@@ -387,14 +422,15 @@ export function generateShellScript(config: Config): string {
             out.push(`# MacPorts 不支持以下工具: ${unsupported.join(", ")}`);
           }
         } else {
-          out.push(`# 未选择包管理器，请手动安装: ${selectedTools.map(t => t.id).join(", ")}`);
+          out.push(`# 未选择包管理器，请手动安装: ${selectedTools.map((t) => t.id).join(", ")}`);
         }
       }
     }
   }
 
   if (config.developerTools.containers.addCurrentUserToContainerGroups) {
-    if (config.developerTools.containers.docker) out.push('sudo usermod -aG docker "$USER" || true');
+    if (config.developerTools.containers.docker)
+      out.push('sudo usermod -aG docker "$USER" || true');
     if (config.developerTools.containers.lxd) out.push('sudo usermod -aG lxd "$USER" || true');
   }
 

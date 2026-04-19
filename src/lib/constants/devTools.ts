@@ -53,7 +53,12 @@ export const GUI_TOOLS: ToolDefinition[] = [
   { id: "microsoft-edge", name: "Microsoft Edge", isCask: true, notInPorts: true },
   { id: "firefox", name: "Firefox", isCask: true, notInPorts: true },
   { id: "github-desktop", name: "GitHub Desktop", isCask: true, notInPorts: true },
-  { id: "another-redis-desktop-manager", name: "Another Redis Desktop Manager", isCask: true, notInPorts: true },
+  {
+    id: "another-redis-desktop-manager",
+    name: "Another Redis Desktop Manager",
+    isCask: true,
+    notInPorts: true,
+  },
 ];
 
 export const AI_TOOLS: ToolDefinition[] = [

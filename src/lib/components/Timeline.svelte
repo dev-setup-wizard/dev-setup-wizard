@@ -10,9 +10,9 @@
 
   const moduleLabels: Record<ModuleKey, string> = {
     "package-managers": "包管理器",
-    "node": "Node.js",
-    "python": "Python",
-    "java": "Java",
+    node: "Node.js",
+    python: "Python",
+    java: "Java",
     "other-languages": "其他语言",
     "developer-tools": "开发者工具",
   };
@@ -32,21 +32,33 @@
     {@const isPast = getCurrentIndex() > i}
     {@const lineHighlighted = isPast || isActive}
     {#if i > 0}
-      <div class="h-0.5 w-4 bg-slate-700 mt-[10px] {lineHighlighted ? 'bg-teal-500' : ''}"></div>
+      <div class="mt-[10px] h-0.5 w-4 bg-slate-700 {lineHighlighted ? 'bg-teal-500' : ''}"></div>
     {/if}
     <div class="flex w-12 flex-col items-center">
       <button
         type="button"
-        class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all {isActive ? 'border-teal-400 bg-teal-500' : isPast ? 'border-teal-500 bg-teal-500/20' : 'border-slate-600 bg-slate-800'}"
+        class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all {isActive
+          ? 'border-teal-400 bg-teal-500'
+          : isPast
+            ? 'border-teal-500 bg-teal-500/20'
+            : 'border-slate-600 bg-slate-800'}"
         onclick={() => onNavigate(module)}
       >
         {#if isPast}
           <svg class="h-3 w-3 text-teal-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            />
           </svg>
         {/if}
       </button>
-      <span class="mt-1 text-[10px] font-medium text-center leading-tight transition-colors {isActive ? 'text-teal-400' : 'text-slate-500'} whitespace-nowrap">
+      <span
+        class="mt-1 text-center text-[10px] leading-tight font-medium transition-colors {isActive
+          ? 'text-teal-400'
+          : 'text-slate-500'} whitespace-nowrap"
+      >
         {moduleLabels[module]}
       </span>
     </div>

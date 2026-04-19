@@ -53,7 +53,9 @@
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">包管理器偏好（必选）</h2>
       <p class="mt-2 text-sm text-slate-400">这将决定后续所有软件的安装方式。</p>
     </div>
-    <span class="rounded-full border border-teal-500/40 bg-teal-500/10 px-2.5 py-1 text-xs text-teal-300">
+    <span
+      class="rounded-full border border-teal-500/40 bg-teal-500/10 px-2.5 py-1 text-xs text-teal-300"
+    >
       必选
     </span>
   </div>
@@ -70,15 +72,17 @@
         title={option.tooltip}
         onclick={() => setManager(option.key)}
       >
-        <span class={`h-4 w-4 rounded-full border-2 ${
-          selectedManager === option.key
-            ? "border-teal-500 bg-teal-500"
-            : "border-slate-600"
-        }`}></span>
+        <span
+          class={`h-4 w-4 rounded-full border-2 ${
+            selectedManager === option.key ? "border-teal-500 bg-teal-500" : "border-slate-600"
+          }`}
+        ></span>
         <span>
           <span class="text-sm font-medium text-slate-100">{option.title}</span>
           <span class="mt-1 block text-xs text-slate-400">{option.description}</span>
-          <span class="mt-2 block text-[11px] text-teal-300/90 opacity-0 transition group-hover:opacity-100">
+          <span
+            class="mt-2 block text-[11px] text-teal-300/90 opacity-0 transition group-hover:opacity-100"
+          >
             提示：{option.tooltip}
           </span>
         </span>
@@ -87,7 +91,9 @@
   </div>
 
   {#if selectedManager === "none"}
-    <p class="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+    <p
+      class="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300"
+    >
       注意：不使用包管理器将影响后续安装选项。部分工具可能需要手动安装或使用官方脚本。
     </p>
   {/if}

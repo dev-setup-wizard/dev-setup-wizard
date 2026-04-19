@@ -8,7 +8,7 @@
     rust: $configStore.otherLanguages?.rust ?? { enabled: false, installMethod: "brew" },
     dart: $configStore.otherLanguages?.dart ?? { enabled: false, installMethod: "brew" },
     otherEnabled: $configStore.otherLanguages?.otherEnabled ?? false,
-    otherName: $configStore.otherLanguages?.otherName ?? ""
+    otherName: $configStore.otherLanguages?.otherName ?? "",
   });
 
   const selectedManagers = $derived($configStore.packageManagers.packageManagers ?? ["none"]);
@@ -54,7 +54,9 @@
   </div>
 
   <div class="mt-5 grid grid-cols-1 gap-3">
-    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50">
+    <label
+      class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50"
+    >
       <div class="flex items-center gap-2">
         <input
           type="checkbox"
@@ -77,7 +79,9 @@
       {/if}
     </label>
 
-    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50">
+    <label
+      class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50"
+    >
       <div class="flex items-center gap-2">
         <input
           type="checkbox"
@@ -100,7 +104,9 @@
       {/if}
     </label>
 
-    <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50">
+    <label
+      class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2 transition hover:border-teal-500/50 has-[:checked]:border-teal-500/50"
+    >
       <div class="flex items-center gap-2">
         <input
           type="checkbox"

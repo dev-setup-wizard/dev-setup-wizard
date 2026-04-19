@@ -28,11 +28,13 @@
   const canSelectOptions = $derived(pythonConfig.pythonInstallMethod !== "none");
 
   const filteredInstallMethods = $derived(
-    installMethodOptions.map((opt) => {
-      if (opt.key === "brew" && !hasHomebrew) return null;
-      if (opt.key === "ports" && !hasPorts) return null;
-      return opt;
-    }).filter(Boolean) as InstallMethodOption[],
+    installMethodOptions
+      .map((opt) => {
+        if (opt.key === "brew" && !hasHomebrew) return null;
+        if (opt.key === "ports" && !hasPorts) return null;
+        return opt;
+      })
+      .filter(Boolean) as InstallMethodOption[],
   );
 
   function setInstallMethod(next: PythonInstallMethod): void {
@@ -44,7 +46,10 @@
     });
   }
 
-  function setBoolean(key: "installPythonLatest" | "aliasPythonToPython3" | "installPython2", value: boolean): void {
+  function setBoolean(
+    key: "installPythonLatest" | "aliasPythonToPython3" | "installPython2",
+    value: boolean,
+  ): void {
     configStore.patch({
       python: {
         ...pythonConfig,
@@ -82,10 +87,16 @@
     </div>
   </div>
 
-  <div class="mt-5" class:opacity-50={!canSelectOptions} class:pointer-events-none={!canSelectOptions}>
+  <div
+    class="mt-5"
+    class:opacity-50={!canSelectOptions}
+    class:pointer-events-none={!canSelectOptions}
+  >
     <h3 class="text-sm font-medium text-slate-200">Python 选项</h3>
     <div class="mt-3 space-y-3">
-      <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label
+        class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
+      >
         <span class="text-sm text-slate-200">安装 Python 最新版</span>
         <input
           type="checkbox"
@@ -96,7 +107,9 @@
         />
       </label>
 
-      <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2">
+      <label
+        class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/30 px-3 py-2"
+      >
         <span class="text-sm text-slate-200">alias python=python3</span>
         <input
           type="checkbox"
@@ -107,7 +120,9 @@
         />
       </label>
 
-      <label class="flex items-center justify-between rounded-lg border border-amber-700/40 bg-amber-950/20 px-3 py-2">
+      <label
+        class="flex items-center justify-between rounded-lg border border-amber-700/40 bg-amber-950/20 px-3 py-2"
+      >
         <span class="text-sm text-amber-200">Python 2 (已 EOL)</span>
         <input
           type="checkbox"

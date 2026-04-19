@@ -4,7 +4,15 @@ export type PackageManager = "homebrew" | "macports" | "none";
 export type NodeInstallMethod = "fnm" | "nvm" | "n" | "asdf" | "mise" | "brew" | "ports" | "none";
 export type NodeVersion = "v25" | "v24" | "v22";
 export type JsRuntimeInstallMethod = "npm-global" | "brew" | "ports" | "script";
-export type PythonInstallMethod = "uv" | "pyenv" | "conda" | "mise" | "asdf" | "brew" | "ports" | "none";
+export type PythonInstallMethod =
+  | "uv"
+  | "pyenv"
+  | "conda"
+  | "mise"
+  | "asdf"
+  | "brew"
+  | "ports"
+  | "none";
 export type PythonToolInstallMethod = "pip" | "brew" | "ports" | "script";
 export type JdkInstallMethod = "sdkman" | "brew" | "ports" | "mise" | "asdf" | "none";
 export type JdkDistribution = "openjdk" | "oracle" | "temurin";
@@ -26,7 +34,6 @@ export interface NodeConfig {
   bunInstallMethod: JsRuntimeInstallMethod;
   installDeno: boolean;
   denoInstallMethod: JsRuntimeInstallMethod;
-  
 }
 
 export interface PythonConfig {

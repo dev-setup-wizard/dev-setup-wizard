@@ -21,10 +21,16 @@ function makeConfig(patch: Partial<Config>): Config {
       },
       servers: { ...defaultConfig.developerTools.servers, ...patch.developerTools?.servers },
       databases: { ...defaultConfig.developerTools.databases, ...patch.developerTools?.databases },
-      containers: { ...defaultConfig.developerTools.containers, ...patch.developerTools?.containers },
+      containers: {
+        ...defaultConfig.developerTools.containers,
+        ...patch.developerTools?.containers,
+      },
       guiApps: { ...defaultConfig.developerTools.guiApps, ...patch.developerTools?.guiApps },
       aiTools: { ...defaultConfig.developerTools.aiTools, ...patch.developerTools?.aiTools },
-      networkTools: { ...defaultConfig.developerTools.networkTools, ...patch.developerTools?.networkTools },
+      networkTools: {
+        ...defaultConfig.developerTools.networkTools,
+        ...patch.developerTools?.networkTools,
+      },
     },
     ui: { ...defaultConfig.ui, ...patch.ui },
   };

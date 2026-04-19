@@ -57,7 +57,7 @@
   </div>
 
   <pre
-    class="min-h-0 flex-1 overflow-auto overflow-auto rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-5 text-slate-300"><code
+    class="min-h-0 flex-1 overflow-auto rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-5 text-slate-300"><code
       >{script}</code
     ></pre>
 </aside>

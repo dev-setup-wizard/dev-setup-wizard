@@ -1,11 +1,7 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
   import { configStore } from "$stores/configStore";
-  import type {
-    NodeInstallMethod,
-    NodeVersion,
-    JsRuntimeInstallMethod,
-  } from "$types/config";
+  import type { NodeInstallMethod, NodeVersion, JsRuntimeInstallMethod } from "$types/config";
 
   type VmOption = {
     key: NodeInstallMethod;
@@ -29,9 +25,7 @@
     { key: "v22", label: "v22 (LTS)" },
   ];
 
-  const selectedManagers = $derived(
-    $configStore.packageManagers.packageManagers,
-  );
+  const selectedManagers = $derived($configStore.packageManagers.packageManagers);
   const nodeConfig = $derived($configStore.node);
 
   const hasHomebrew = $derived(selectedManagers.includes("homebrew"));
@@ -39,8 +33,7 @@
   const hasPackageManager = $derived(hasHomebrew || hasPorts);
 
   const isBrewOrPorts = $derived(
-    nodeConfig.nodeInstallMethod === "brew" ||
-      nodeConfig.nodeInstallMethod === "ports",
+    nodeConfig.nodeInstallMethod === "brew" || nodeConfig.nodeInstallMethod === "ports",
   );
   const isNodeInstalled = $derived(nodeConfig.nodeInstallMethod !== "none");
   const isVersionManager = $derived(
@@ -99,14 +92,14 @@
   function toggleNodeVersion(version: NodeVersion, checked: boolean): void {
     const current = nodeConfig.nodeVersions;
     const next = checked
-        ? Array.from(new Set([...current, version]))
-        : current.filter((item) => item !== version);
-      configStore.patch({
-        node: {
-          ...nodeConfig,
-          nodeVersions: next,
-        },
-      });
+      ? Array.from(new Set([...current, version]))
+      : current.filter((item) => item !== version);
+    configStore.patch({
+      node: {
+        ...nodeConfig,
+        nodeVersions: next,
+      },
+    });
   }
 
   function setSingleVersion(version: NodeVersion): void {
@@ -119,12 +112,7 @@
   }
 
   function setBoolean(
-    key:
-      | "enableCorepack"
-      | "installYarn"
-      | "installPnpm"
-      | "installDeno"
-      | "installBun",
+    key: "enableCorepack" | "installYarn" | "installPnpm" | "installDeno" | "installBun",
     value: boolean,
   ): void {
     configStore.patch({
@@ -159,9 +147,7 @@
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">
         Node.js / JavaScript 模块
       </h2>
-      <p class="mt-2 text-sm text-slate-400">
-        选择 Node.js 安装方式、版本以及常用 JS 生态工具。
-      </p>
+      <p class="mt-2 text-sm text-slate-400">选择 Node.js 安装方式、版本以及常用 JS 生态工具。</p>
     </div>
   </div>
 
@@ -171,8 +157,7 @@
       <select
         class="w-full rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
         value={nodeConfig.nodeInstallMethod}
-        onchange={(e) =>
-          setInstallMethod(e.currentTarget.value as NodeInstallMethod)}
+        onchange={(e) => setInstallMethod(e.currentTarget.value as NodeInstallMethod)}
       >
         {#each filteredInstallMethods as option (option.key)}
           <option value={option.key}>{option.label}</option>
@@ -195,8 +180,7 @@
             class="h-4 w-4 accent-teal-500"
             checked={nodeConfig.nodeVersions.includes(option.key)}
             disabled={!canSelectVersions}
-            onchange={(event) =>
-              toggleNodeVersion(option.key, event.currentTarget.checked)}
+            onchange={(event) => toggleNodeVersion(option.key, event.currentTarget.checked)}
           />
           {option.label}
         </label>
@@ -217,8 +201,7 @@
           class="h-4 w-4 accent-teal-500"
           checked={canInstallPm && nodeConfig.enableCorepack}
           disabled={!canInstallPm}
-          onchange={(event) =>
-            setBoolean("enableCorepack", event.currentTarget.checked)}
+          onchange={(event) => setBoolean("enableCorepack", event.currentTarget.checked)}
         />
         corepack enable
       </label>
@@ -228,8 +211,7 @@
           class="h-4 w-4 accent-teal-500"
           checked={canInstallPm && nodeConfig.installYarn}
           disabled={!canInstallPm}
-          onchange={(event) =>
-            setBoolean("installYarn", event.currentTarget.checked)}
+          onchange={(event) => setBoolean("installYarn", event.currentTarget.checked)}
         />
         yarn
       </label>
@@ -239,8 +221,7 @@
           class="h-4 w-4 accent-teal-500"
           checked={canInstallPm && nodeConfig.installPnpm}
           disabled={!canInstallPm}
-          onchange={(event) =>
-            setBoolean("installPnpm", event.currentTarget.checked)}
+          onchange={(event) => setBoolean("installPnpm", event.currentTarget.checked)}
         />
         pnpm
       </label>
@@ -260,8 +241,7 @@
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
           checked={nodeConfig.installBun}
-          onchange={(event) =>
-            setBoolean("installBun", event.currentTarget.checked)}
+          onchange={(event) => setBoolean("installBun", event.currentTarget.checked)}
         />
         <span class="text-sm text-slate-200">Bun</span>
       </div>
@@ -270,10 +250,7 @@
           class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
           value={nodeConfig.bunInstallMethod}
           onchange={(e) =>
-            setMethod(
-              "bunInstallMethod",
-              e.currentTarget.value as JsRuntimeInstallMethod,
-            )}
+            setMethod("bunInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
         >
           {#each filteredRuntimeMethods() as opt}
             <option value={opt.key}>{opt.label}</option>
@@ -290,8 +267,7 @@
           type="checkbox"
           class="h-4 w-4 accent-teal-500"
           checked={nodeConfig.installDeno}
-          onchange={(event) =>
-            setBoolean("installDeno", event.currentTarget.checked)}
+          onchange={(event) => setBoolean("installDeno", event.currentTarget.checked)}
         />
         <span class="text-sm text-slate-200">Deno</span>
       </div>
@@ -300,10 +276,7 @@
           class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200"
           value={nodeConfig.denoInstallMethod}
           onchange={(e) =>
-            setMethod(
-              "denoInstallMethod",
-              e.currentTarget.value as JsRuntimeInstallMethod,
-            )}
+            setMethod("denoInstallMethod", e.currentTarget.value as JsRuntimeInstallMethod)}
         >
           {#each filteredRuntimeMethods() as opt}
             <option value={opt.key}>{opt.label}</option>

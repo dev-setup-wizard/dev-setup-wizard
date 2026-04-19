@@ -22,13 +22,13 @@ ScriptPreviewPanel  ← display generated script
 
 ### 核心文件
 
-| 文件 | 作用 |
-|------|------|
-| `src/lib/types/config.ts` | 所有配置类型定义和默认值 |
-| `src/lib/stores/configStore.ts` | 集中式状态管理，含 patch/reset/persist |
-| `src/lib/utils/generateShellScript.ts` | 根据 Config 生成 Shell 脚本字符串 |
-| `src/App.svelte` | 主页面，监听 store 变化并触发脚本生成 |
-| `src/lib/components/modules/*.svelte` | 各配置模块 UI |
+| 文件                                   | 作用                                   |
+| -------------------------------------- | -------------------------------------- |
+| `src/lib/types/config.ts`              | 所有配置类型定义和默认值               |
+| `src/lib/stores/configStore.ts`        | 集中式状态管理，含 patch/reset/persist |
+| `src/lib/utils/generateShellScript.ts` | 根据 Config 生成 Shell 脚本字符串      |
+| `src/App.svelte`                       | 主页面，监听 store 变化并触发脚本生成  |
+| `src/lib/components/modules/*.svelte`  | 各配置模块 UI                          |
 
 ### 配置模块顺序
 
@@ -66,8 +66,8 @@ MODULE_ORDER = [
 
 ```typescript
 configStore.patch({
-  node: { nodeVersionManager: "fnm", nodeVersions: ["lts", "latest"] }
-})
+  node: { nodeVersionManager: "fnm", nodeVersions: ["lts", "latest"] },
+});
 ```
 
 ### 添加新的开发者工具选项

@@ -40,16 +40,18 @@
   const canSelectOptions = $derived(javaConfig.jdkInstallMethod !== "none");
 
   const filteredInstallMethods = $derived(
-    installMethodOptions.map((opt) => {
-      if (opt.key === "brew" && !hasHomebrew) return null;
-      if (opt.key === "ports" && !hasPorts) return null;
-      return opt;
-    }).filter(Boolean) as InstallMethodOption[],
+    installMethodOptions
+      .map((opt) => {
+        if (opt.key === "brew" && !hasHomebrew) return null;
+        if (opt.key === "ports" && !hasPorts) return null;
+        return opt;
+      })
+      .filter(Boolean) as InstallMethodOption[],
   );
 
   function setInstallMethod(next: JdkInstallMethod): void {
     configStore.patch({
-      java: {...javaConfig, jdkInstallMethod: next},
+      java: { ...javaConfig, jdkInstallMethod: next },
     });
   }
 
@@ -58,7 +60,7 @@
     const next = checked
       ? Array.from(new Set([...current, version]))
       : current.filter((item) => item !== version);
-    configStore.patch({java: {...javaConfig, jdkVersions: next}});
+    configStore.patch({ java: { ...javaConfig, jdkVersions: next } });
   }
 
   function setDistribution(next: JdkDistribution): void {
@@ -99,11 +101,17 @@
     </div>
   </div>
 
-  <div class="mt-5" class:opacity-50={!canSelectOptions} class:pointer-events-none={!canSelectOptions}>
+  <div
+    class="mt-5"
+    class:opacity-50={!canSelectOptions}
+    class:pointer-events-none={!canSelectOptions}
+  >
     <h3 class="text-sm font-medium text-slate-200">JDK 版本</h3>
     <div class="mt-2 flex flex-wrap gap-2">
       {#each versionOptions as option (option.key)}
-        <label class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
+        <label
+          class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
+        >
           <input
             type="checkbox"
             class="h-4 w-4 accent-teal-500"
@@ -117,11 +125,17 @@
     </div>
   </div>
 
-  <div class="mt-5" class:opacity-50={!canSelectOptions} class:pointer-events-none={!canSelectOptions}>
+  <div
+    class="mt-5"
+    class:opacity-50={!canSelectOptions}
+    class:pointer-events-none={!canSelectOptions}
+  >
     <h3 class="text-sm font-medium text-slate-200">JDK 发行版</h3>
     <div class="mt-2 flex flex-wrap gap-2">
       {#each distributionOptions as option (option.key)}
-        <label class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
+        <label
+          class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/40 px-3 py-2 text-sm text-slate-200"
+        >
           <input
             type="radio"
             name="jdk-distribution"

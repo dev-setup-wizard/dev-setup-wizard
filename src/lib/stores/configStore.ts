@@ -65,7 +65,10 @@ function loadInitialConfig(): Config {
       },
       servers: { ...defaultConfig.developerTools.servers, ...parsed.developerTools?.servers },
       databases: { ...defaultConfig.developerTools.databases, ...parsed.developerTools?.databases },
-      containers: { ...defaultConfig.developerTools.containers, ...parsed.developerTools?.containers },
+      containers: {
+        ...defaultConfig.developerTools.containers,
+        ...parsed.developerTools?.containers,
+      },
       guiApps: { ...defaultConfig.developerTools.guiApps, ...parsed.developerTools?.guiApps },
       aiTools: { ...defaultConfig.developerTools.aiTools, ...parsed.developerTools?.aiTools },
       networkTools: {
@@ -121,7 +124,6 @@ function createConfigStore() {
     },
     patch(patch: Partial<Config>) {
       update((current) => {
-        
         const next: Config = {
           ...current,
           ...patch,
@@ -132,7 +134,7 @@ function createConfigStore() {
               patch.packageManagers?.packageManagers ?? current.packageManagers.packageManagers,
             ),
           },
-          node: {...current.node, ...patch.node},
+          node: { ...current.node, ...patch.node },
           python: { ...current.python, ...patch.python },
           java: { ...current.java, ...patch.java },
           otherLanguages: {
@@ -153,7 +155,10 @@ function createConfigStore() {
             },
             servers: { ...current.developerTools.servers, ...patch.developerTools?.servers },
             databases: { ...current.developerTools.databases, ...patch.developerTools?.databases },
-            containers: { ...current.developerTools.containers, ...patch.developerTools?.containers },
+            containers: {
+              ...current.developerTools.containers,
+              ...patch.developerTools?.containers,
+            },
             guiApps: { ...current.developerTools.guiApps, ...patch.developerTools?.guiApps },
             aiTools: { ...current.developerTools.aiTools, ...patch.developerTools?.aiTools },
             networkTools: {
@@ -210,10 +215,7 @@ function hasModuleSelection(config: Config, module: ModuleKey): boolean {
         config.python.installPython2
       );
     case "java":
-      return (
-        config.java.jdkInstallMethod !== "none" ||
-        config.java.jdkVersions.length > 0
-      );
+      return config.java.jdkInstallMethod !== "none" || config.java.jdkVersions.length > 0;
     case "other-languages":
       return (
         config.otherLanguages.go.enabled ||

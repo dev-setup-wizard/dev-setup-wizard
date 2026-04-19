@@ -29,7 +29,7 @@
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            const id = entry.target.id.replace('module-', '') as ModuleKey;
+            const id = entry.target.id.replace("module-", "") as ModuleKey;
             if (MODULE_ORDER.includes(id)) {
               currentModule = id;
               configStore.setCurrentModule(id);
@@ -38,14 +38,14 @@
           }
         }
       },
-      { rootMargin: "-20% 0px -60% 0px" }
+      { rootMargin: "-20% 0px -60% 0px" },
     );
-    
-    MODULE_ORDER.forEach(key => {
+
+    MODULE_ORDER.forEach((key) => {
       const el = document.getElementById(`module-${key}`);
       if (el) observer.observe(el);
     });
-    
+
     return () => observer.disconnect();
   });
 
@@ -63,29 +63,30 @@
   function handleNavigate(module: ModuleKey) {
     const element = document.getElementById(`module-${module}`);
     if (element) {
-      const header = document.querySelector('header');
+      const header = document.querySelector("header");
       const headerHeight = header ? header.offsetHeight + 20 : 100;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: elementPosition - headerHeight,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   }
 </script>
 
 <main class="mx-auto min-h-screen w-full max-w-[1400px] px-4 py-4">
-  <header class="sticky top-4 z-20 mb-4 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-4 backdrop-blur">
+  <header
+    class="sticky top-4 z-20 mb-4 rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-4 backdrop-blur"
+  >
     <div class="flex items-center justify-between gap-4">
       <div>
         <p class="text-xs font-medium tracking-wide text-teal-400">dev-setup-wizard</p>
         <h1 class="text-lg font-semibold text-slate-100 md:text-xl">{title}</h1>
       </div>
       <div class="mt-4 flex justify-center">
-      <Timeline {currentModule} onNavigate={handleNavigate} />
+        <Timeline {currentModule} onNavigate={handleNavigate} />
+      </div>
     </div>
-    </div>
-    
   </header>
 
   <div class="grid gap-6 lg:grid-cols-[1fr_420px]">
@@ -97,8 +98,10 @@
       <OtherLanguagesModule />
       <DeveloperToolsModule />
     </div>
-    <div class="lg:sticky lg:top-[128px] lg:self-start h-[calc(100vh-145px)] overflow-y-auto flex flex-col">    
-     <ScriptPreviewPanel script={scriptOutput} />
+    <div
+      class="flex h-[calc(100vh-145px)] flex-col overflow-y-auto lg:sticky lg:top-[128px] lg:self-start"
+    >
+      <ScriptPreviewPanel script={scriptOutput} />
     </div>
   </div>
 </main>
