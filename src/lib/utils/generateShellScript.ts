@@ -1,4 +1,5 @@
 import type { Config, PackageManager } from "$types/config";
+import { DEV_TOOLS_SECTIONS, type ToolDefinition } from "$lib/constants/devTools";
 
 function lines(...items: string[]): string {
   return items.filter(Boolean).join("\n");
@@ -356,63 +357,39 @@ export function generateShellScript(config: Config): string {
 
   // Developer tools
   const pm = hasPackageManager(config) ? preferredPm : "none";
-  if (pm !== "none") {
+  if (pm !== "none" || true) { // Even if no PM selected, we might want to see the section
     out.push("# ---- Developer Tools ----");
 
-    const cliPackages = Object.entries(config.developerTools.cliTools)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (cliPackages.length > 0) {
-      out.push("# CLI 工具");
-      out.push(...addInstallByPackageManager(pm, cliPackages));
-    }
-
-    const serverPackages = Object.entries(config.developerTools.servers)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (serverPackages.length > 0) {
-      out.push("# 服务器");
-      out.push(...addInstallByPackageManager(pm, serverPackages));
-    }
-
-    const databasePackages = Object.entries(config.developerTools.databases)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (databasePackages.length > 0) {
-      out.push("# 数据库");
-      out.push(...addInstallByPackageManager(pm, databasePackages));
-    }
-
-    const containerPackages = Object.entries(config.developerTools.containers)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (containerPackages.length > 0) {
-      out.push("# 容器");
-      out.push(...addInstallByPackageManager(pm, containerPackages));
-    }
-
-    const guiPackages = Object.entries(config.developerTools.guiApps)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (guiPackages.length > 0) {
-      out.push("# GUI 应用");
-      out.push(...addInstallByPackageManager(pm, guiPackages));
-    }
-
-    const aiPackages = Object.entries(config.developerTools.aiTools)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (aiPackages.length > 0) {
-      out.push("# AI 工具");
-      out.push(...addInstallByPackageManager(pm, aiPackages));
-    }
-
-    const networkPackages = Object.entries(config.developerTools.networkTools)
-      .filter(([, enabled]) => enabled)
-      .map(([name]) => name);
-    if (networkPackages.length > 0) {
-      out.push("# 网络工具");
-      out.push(...addInstallByPackageManager(pm, networkPackages));
+    for (const section of DEV_TOOLS_SECTIONS) {
+      const selectedTools = section.tools.filter(t => (config.developerTools[section.key] as any)[t.id]);
+      
+      if (selectedTools.length > 0) {
+        out.push(`# ${section.title}`);
+        
+        if (preferredPm === "homebrew") {
+          const formulaes = selectedTools.filter(t => !t.isCask).map(t => t.id);
+          const casks = selectedTools.filter(t => t.isCask).map(t => t.id);
+          
+          if (formulaes.length > 0) {
+            out.push(`brew install ${formulaes.join(" ")}`);
+          }
+          if (casks.length > 0) {
+            out.push(`brew install --cask ${casks.join(" ")}`);
+          }
+        } else if (preferredPm === "macports") {
+          const supported = selectedTools.filter(t => !t.notInPorts).map(t => t.id);
+          const unsupported = selectedTools.filter(t => t.notInPorts).map(t => t.id);
+          
+          if (supported.length > 0) {
+            out.push(`sudo port install ${supported.join(" ")}`);
+          }
+          if (unsupported.length > 0) {
+            out.push(`# MacPorts 不支持以下工具: ${unsupported.join(", ")}`);
+          }
+        } else {
+          out.push(`# 未选择包管理器，请手动安装: ${selectedTools.map(t => t.id).join(", ")}`);
+        }
+      }
     }
   }
 
