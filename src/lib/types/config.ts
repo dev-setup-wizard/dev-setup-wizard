@@ -96,22 +96,22 @@ export interface ContainersConfig {
 export interface GuiAppsConfig {
   vscode: boolean;
   "android-studio": boolean;
-  intellijIdea: boolean;
+  "intellij-idea": boolean;
   webstorm: boolean;
   pycharm: boolean;
-  sublimeText: boolean;
+  "sublime-text": boolean;
   iterm2: boolean;
-  googleChrome: boolean;
-  microsoftEdge: boolean;
+  "google-chrome": boolean;
+  "microsoft-edge": boolean;
   firefox: boolean;
-  githubDesktop: boolean;
-  anotherRedisDesktopManager: boolean;
+  "github-desktop": boolean;
+  "another-redis-desktop-manager": boolean;
 }
 
 export interface AiToolsConfig {
   ollama: boolean;
-  continueDevCli: boolean;
-  openWebui: boolean;
+  continue: boolean;
+  "open-webui": boolean;
 }
 
 export interface NetworkToolsConfig {
@@ -249,21 +249,21 @@ export const defaultConfig: Config = {
     guiApps: {
       vscode: true,
       "android-studio": false,
-      intellijIdea: false,
+      "intellij-idea": false,
       webstorm: false,
       pycharm: false,
-      sublimeText: false,
+      "sublime-text": false,
       iterm2: false,
-      googleChrome: false,
-      microsoftEdge: false,
+      "google-chrome": false,
+      "microsoft-edge": false,
       firefox: false,
-      githubDesktop: false,
-      anotherRedisDesktopManager: false,
+      "github-desktop": false,
+      "another-redis-desktop-manager": false,
     },
     aiTools: {
       ollama: false,
-      continueDevCli: false,
-      openWebui: false,
+      continue: false,
+      "open-webui": false,
     },
     networkTools: {
       postman: false,

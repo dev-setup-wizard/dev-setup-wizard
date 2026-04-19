@@ -44,22 +44,22 @@ export const CONTAINER_TOOLS: ToolDefinition[] = [
 export const GUI_TOOLS: ToolDefinition[] = [
   { id: "vscode", name: "VS Code", isCask: true, notInPorts: true },
   { id: "android-studio", name: "Android Studio", isCask: true, notInPorts: true },
-  { id: "intellijIdea", name: "IntelliJ IDEA", isCask: true, notInPorts: true },
+  { id: "intellij-idea", name: "IntelliJ IDEA", isCask: true, notInPorts: true },
   { id: "webstorm", name: "WebStorm", isCask: true, notInPorts: true },
   { id: "pycharm", name: "PyCharm", isCask: true, notInPorts: true },
-  { id: "sublimeText", name: "Sublime Text", isCask: true, notInPorts: true },
+  { id: "sublime-text", name: "Sublime Text", isCask: true, notInPorts: true },
   { id: "iterm2", name: "iTerm2", isCask: true, isMacOnly: true, notInPorts: true },
-  { id: "googleChrome", name: "Google Chrome", isCask: true, notInPorts: true },
-  { id: "microsoftEdge", name: "Microsoft Edge", isCask: true, notInPorts: true },
+  { id: "google-chrome", name: "Google Chrome", isCask: true, notInPorts: true },
+  { id: "microsoft-edge", name: "Microsoft Edge", isCask: true, notInPorts: true },
   { id: "firefox", name: "Firefox", isCask: true, notInPorts: true },
-  { id: "githubDesktop", name: "GitHub Desktop", isCask: true, notInPorts: true },
-  { id: "anotherRedisDesktopManager", name: "Another Redis Desktop Manager", isCask: true, notInPorts: true },
+  { id: "github-desktop", name: "GitHub Desktop", isCask: true, notInPorts: true },
+  { id: "another-redis-desktop-manager", name: "Another Redis Desktop Manager", isCask: true, notInPorts: true },
 ];
 
 export const AI_TOOLS: ToolDefinition[] = [
   { id: "ollama", name: "Ollama", isCask: true, notInPorts: true },
-  { id: "continueDevCli", name: "Continue (CLI)", notInPorts: true },
-  { id: "openWebui", name: "Open WebUI", notInPorts: true },
+  { id: "continue", name: "Continue (CLI)", notInPorts: true },
+  { id: "open-webui", name: "Open WebUI", notInPorts: true },
 ];
 
 export const NETWORK_TOOLS: ToolDefinition[] = [
