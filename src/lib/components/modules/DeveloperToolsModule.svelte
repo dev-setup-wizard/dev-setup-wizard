@@ -90,7 +90,7 @@
 
       <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
         <summary class="cursor-pointer text-sm font-medium text-slate-100">数据库</summary>
-        <div class="mt-3 grid gap-2 md:grid-cols-2">
+        <div class="mt-3 grid gap-2 md:grid-cols-3">
           {#each databaseKeys as key (key)}
             <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
               <span>{key}</span>
@@ -102,7 +102,7 @@
 
       <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
         <summary class="cursor-pointer text-sm font-medium text-slate-100">容器 & 虚拟化</summary>
-        <div class="mt-3 grid gap-2 md:grid-cols-2">
+        <div class="mt-3 grid gap-2 md:grid-cols-3">
           {#each containerKeys as key (key)}
             <label class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${key === "appleVirtualization" && !isMac ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500" : "border-slate-700 bg-slate-900/40 text-slate-200"}`} title={key === "appleVirtualization" && !isMac ? "仅 macOS 可用" : ""}>
               <span>{key === "appleVirtualization" ? "Apple Virtualization（仅 Mac）" : key}</span>
@@ -114,7 +114,7 @@
 
       <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
         <summary class="cursor-pointer text-sm font-medium text-slate-100">GUI 应用</summary>
-        <div class="mt-3 grid gap-2 md:grid-cols-2">
+        <div class="mt-3 grid gap-2 md:grid-cols-3">
           {#each guiKeys as key (key)}
             <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
               <span>{key}</span>
@@ -126,7 +126,7 @@
 
       <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
         <summary class="cursor-pointer text-sm font-medium text-slate-100">AI 工具</summary>
-        <div class="mt-3 grid gap-2 md:grid-cols-2">
+        <div class="mt-3 grid gap-2 md:grid-cols-3">
           {#each aiKeys as key (key)}
             <label class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
               <span>{key}</span>
@@ -138,7 +138,7 @@
 
       <details class="rounded-xl border border-slate-700 bg-slate-950/30 p-4">
         <summary class="cursor-pointer text-sm font-medium text-slate-100">网络工具</summary>
-        <div class="mt-3 grid gap-2 md:grid-cols-2">
+        <div class="mt-3 grid gap-2 md:grid-cols-3">
           {#each networkKeys as key (key)}
             <label class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${key === "proxyman" && !isMac ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500" : "border-slate-700 bg-slate-900/40 text-slate-200"}`} title={key === "proxyman" && !isMac ? "仅 macOS 可用" : ""}>
               <span>{key === "proxyman" ? "Proxyman（仅 Mac）" : key}</span>
