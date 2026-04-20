@@ -47,7 +47,7 @@
 >
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-medium tracking-wide text-teal-400">模块 5 / 6</p>
+      
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">其他语言模块</h2>
       <p class="mt-2 text-sm text-slate-400">选择需要安装的编程语言及其安装方式。</p>
     </div>

@@ -49,7 +49,7 @@
 >
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-medium tracking-wide text-teal-400">模块 1 / 6</p>
+      
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">包管理器偏好（必选）</h2>
       <p class="mt-2 text-sm text-slate-400">这将决定后续所有软件的安装方式。</p>
     </div>

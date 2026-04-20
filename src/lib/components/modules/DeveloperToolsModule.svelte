@@ -10,6 +10,21 @@
   const packageManager = $derived($configStore.packageManagers.packageManagers[0] ?? "none");
   const canInstallTools = $derived(packageManager !== "none");
 
+  // Filter sections and tools based on package manager
+  const filteredSections = $derived(
+    DEV_TOOLS_SECTIONS.map((section) => {
+      const tools = section.tools.filter((tool) => {
+        // Mac only check
+        if (tool.isMacOnly && !isMac) return false;
+        // Package manager specific check
+        if (packageManager === "macports" && tool.notInPorts) return false;
+        return true;
+      });
+
+      return { ...section, tools };
+    }).filter((section) => section.tools.length > 0),
+  );
+
   function patchSection<T extends keyof DeveloperToolsConfig>(
     section: T,
     key: string,
@@ -29,25 +44,23 @@
   class="mt-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 md:p-6"
   in:fly={{ y: 18, duration: 350 }}
 >
-  {#if packageManager === "none"}
-    <div class="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-      <p class="text-sm text-amber-300">
-        选择包管理器后才能安装其他开发者工具。请在第一个模块中选择 Homebrew 或 MacPorts。
-      </p>
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">其他开发者工具</h2>
+      <p class="mt-2 text-sm text-slate-400">按分组选择需要安装的工具。</p>
     </div>
-  {/if}
+  </div>
 
-  <div class:opacity-50={!canInstallTools} class:pointer-events-none={!canInstallTools}>
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <p class="text-xs font-medium tracking-wide text-teal-400">模块 6 / 6</p>
-        <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">其他开发者工具</h2>
-        <p class="mt-2 text-sm text-slate-400">按分组选择需要安装的工具。</p>
+  <div class="mt-5 space-y-3">
+    {#if packageManager === "none"}
+      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+        <p class="text-sm text-amber-300">
+          当前未选择包管理器，暂不支持安装其他开发者工具。请在第一个模块中选择 Homebrew 或
+          MacPorts。
+        </p>
       </div>
-    </div>
-
-    <div class="mt-5 space-y-3">
-      {#each DEV_TOOLS_SECTIONS as section}
+    {:else}
+      {#each filteredSections as section}
         <details
           class="rounded-xl border border-slate-700 bg-slate-950/30 p-4"
           open={section.key === "cliTools"}
@@ -57,19 +70,14 @@
           >
           <div class="mt-3 grid gap-2 md:grid-cols-3">
             {#each section.tools as tool (tool.id)}
-              {@const isOsDisabled = tool.isMacOnly && !isMac}
-              {@const isPmDisabled = packageManager === "macports" && tool.notInPorts}
-              {@const isDisabled = isOsDisabled || isPmDisabled}
               <label
-                class={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${isDisabled ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-500" : "border-slate-700 bg-slate-900/40 text-slate-200"}`}
-                title={isOsDisabled ? "仅 macOS 可用" : isPmDisabled ? "MacPorts 不支持此工具" : ""}
+                class="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-200"
               >
                 <span>{tool.name}{tool.isMacOnly ? "（仅 Mac）" : ""}</span>
                 <input
                   type="checkbox"
                   class="h-4 w-4 accent-teal-500"
                   checked={(devTools[section.key] as any)[tool.id]}
-                  disabled={isDisabled}
                   onchange={(e) =>
                     patchSection(section.key as any, tool.id, e.currentTarget.checked)}
                 />
@@ -78,6 +86,6 @@
           </div>
         </details>
       {/each}
-    </div>
+    {/if}
   </div>
 </section>

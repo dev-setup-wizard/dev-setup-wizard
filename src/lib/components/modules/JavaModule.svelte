@@ -80,7 +80,7 @@
 >
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-medium tracking-wide text-teal-400">模块 4 / 6</p>
+      
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">Java 模块</h2>
       <p class="mt-2 text-sm text-slate-400">选择 JDK 安装方式、版本和发行版。</p>
     </div>

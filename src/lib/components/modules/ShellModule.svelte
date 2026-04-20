@@ -26,7 +26,7 @@
 >
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-medium tracking-wide text-teal-400">模块 6 / 6</p>
+      
       <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">Shell 美化</h2>
       <p class="mt-2 text-sm text-slate-400">选择终端美化方案（二选一）。</p>
     </div>
