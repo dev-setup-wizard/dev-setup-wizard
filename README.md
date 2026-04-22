@@ -40,7 +40,7 @@ src/
 │   │   │   └── DeveloperToolsModule.svelte
 │   │   └── ScriptPreviewPanel.svelte  # 脚本预览面板
 │   ├── stores/
-│   │   └── configStore.ts    # 集中式配置状态管理
+│   │   └── config.svelte.ts    # 集中式配置状态管理
 │   ├── types/
 │   │   └── config.ts        # 配置类型定义
 │   └── utils/

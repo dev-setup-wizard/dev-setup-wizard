@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type ModuleKey, MODULE_ORDER } from "$types/config";
+  import { configStore } from "$stores/config.svelte";
 
   interface Props {
     currentModule: ModuleKey;
@@ -17,6 +18,8 @@
     "developer-tools": "开发者工具",
   };
 
+  const completedModules = $derived(configStore.completedModules);
+
   function getModuleIndex(key: ModuleKey): number {
     return MODULE_ORDER.indexOf(key);
   }
@@ -29,22 +32,26 @@
 <div class="flex items-start">
   {#each MODULE_ORDER as module, i (module)}
     {@const isActive = currentModule === module}
+    {@const isCompleted = completedModules.includes(module)}
     {@const isPast = getCurrentIndex() > i}
     {@const lineHighlighted = isPast || isActive}
+
     {#if i > 0}
       <div class="mt-[10px] h-0.5 w-4 bg-slate-700 {lineHighlighted ? 'bg-teal-500' : ''}"></div>
     {/if}
+
     <div class="flex w-12 flex-col items-center">
       <button
         type="button"
         class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all {isActive
           ? 'border-teal-400 bg-teal-500'
-          : isPast
+          : isCompleted
             ? 'border-teal-500 bg-teal-500/20'
             : 'border-slate-600 bg-slate-800'}"
         onclick={() => onNavigate(module)}
+        title={moduleLabels[module]}
       >
-        {#if isPast}
+        {#if isCompleted && !isActive}
           <svg class="h-3 w-3 text-teal-400" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"

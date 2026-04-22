@@ -8,7 +8,7 @@
   import OtherLanguagesModule from "$components/modules/OtherLanguagesModule.svelte";
   import PackageManagersModule from "$components/modules/PackageManagersModule.svelte";
   import PythonModule from "$components/modules/PythonModule.svelte";
-  import { configStore } from "$stores/configStore";
+  import { configStore } from "$stores/config.svelte";
   import { generateShellScript } from "$utils/generateShellScript";
   import { type ModuleKey, MODULE_ORDER } from "$types/config";
 
@@ -17,14 +17,20 @@
   let scriptOutput = $state("");
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Reactive script generation with debouncing
   $effect(() => {
-    const cfg = $configStore;
-    if (cfg) {
+    const cfg = configStore.value;
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
       scriptOutput = generateShellScript(cfg);
-    }
+    }, 150); // Reduced debounce for better responsiveness
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   });
 
   onMount(() => {
+    // Sync current module with scroll position
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -47,17 +53,6 @@
     });
 
     return () => observer.disconnect();
-  });
-
-  $effect(() => {
-    const cfg = $configStore;
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      scriptOutput = generateShellScript(cfg);
-    }, 300);
-    return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-    };
   });
 
   function handleNavigate(module: ModuleKey) {
