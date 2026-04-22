@@ -1,66 +1,49 @@
 <script lang="ts">
-  import { fly } from "svelte/transition";
-  import { configStore } from "$stores/configStore";
-  import type { Config, DeveloperToolsConfig } from "$types/config";
+  import { configStore } from "$stores/config.svelte";
+  import ModuleContainer from "./ModuleContainer.svelte";
   import { DEV_TOOLS_SECTIONS } from "$lib/constants/devTools";
+  import type { DeveloperToolsConfig } from "$types/config";
 
-  const devTools = $derived($configStore.developerTools);
-  const targetOs = $derived($configStore.ui.targetOs);
+  const devTools = $derived(configStore.value.developerTools);
+  const targetOs = $derived(configStore.value.ui.targetOs);
   const isMac = $derived(targetOs === "macos");
-  const packageManager = $derived($configStore.packageManagers.packageManagers[0] ?? "none");
-  const canInstallTools = $derived(packageManager !== "none");
+  const packageManager = $derived(configStore.value.packageManagers.packageManagers[0] ?? "none");
 
   // Filter sections and tools based on package manager
   const filteredSections = $derived(
     DEV_TOOLS_SECTIONS.map((section) => {
       const tools = section.tools.filter((tool) => {
-        // Mac only check
         if (tool.isMacOnly && !isMac) return false;
-        // Package manager specific check
         if (packageManager === "macports" && tool.notInPorts) return false;
         return true;
       });
-
       return { ...section, tools };
     }).filter((section) => section.tools.length > 0),
   );
 
-  function patchSection<T extends keyof DeveloperToolsConfig>(
-    section: T,
-    key: string,
-    value: boolean,
-  ): void {
+  function patchSection(section: keyof DeveloperToolsConfig, key: string, value: boolean): void {
     configStore.patch({
       developerTools: {
-        ...devTools,
-        [section]: { ...devTools[section], [key]: value },
+        [section]: { [key]: value },
       },
     });
   }
 </script>
 
-<section
+<ModuleContainer
   id="module-developer-tools"
-  class="mt-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 md:p-6"
-  in:fly={{ y: 18, duration: 350 }}
+  title="其他开发者工具"
+  description="按分组选择需要安装的工具。"
 >
-  <div class="flex items-start justify-between gap-3">
-    <div>
-      <h2 class="mt-1 text-xl font-semibold text-slate-100 md:text-2xl">其他开发者工具</h2>
-      <p class="mt-2 text-sm text-slate-400">按分组选择需要安装的工具。</p>
-    </div>
-  </div>
-
-  <div class="mt-5 space-y-3">
+  <div class="space-y-3">
     {#if packageManager === "none"}
       <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
         <p class="text-sm text-amber-300">
-          当前未选择包管理器，暂不支持安装其他开发者工具。请在第一个模块中选择 Homebrew 或
-          MacPorts。
+          当前未选择包管理器，暂不支持安装其他开发者工具。请在第一个模块中选择 Homebrew 或 MacPorts。
         </p>
       </div>
     {:else}
-      {#each filteredSections as section}
+      {#each filteredSections as section (section.key)}
         <details
           class="rounded-xl border border-slate-700 bg-slate-950/30 p-4"
           open={section.key === "cliTools"}
@@ -78,8 +61,7 @@
                   type="checkbox"
                   class="h-4 w-4 accent-teal-500"
                   checked={(devTools[section.key] as any)[tool.id]}
-                  onchange={(e) =>
-                    patchSection(section.key as any, tool.id, e.currentTarget.checked)}
+                  onchange={(e) => patchSection(section.key, tool.id, e.currentTarget.checked)}
                 />
               </label>
             {/each}
@@ -88,4 +70,4 @@
       {/each}
     {/if}
   </div>
-</section>
+</ModuleContainer>
