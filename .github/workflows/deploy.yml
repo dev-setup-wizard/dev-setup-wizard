@@ -4,11 +4,6 @@ on:
   push:
     branches: "main"
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   build_site:
     runs-on: ubuntu-latest
@@ -25,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -33,18 +28,10 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to external repo
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: 'dist/'
-
-  deploy:
-    needs: build_site
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+          external_repository: dev-setup-wizard/dev-setup-wizard.github.io
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: main
